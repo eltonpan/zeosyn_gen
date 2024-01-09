@@ -315,14 +315,67 @@ class ZeoSynGenDataset:
             #    self.y_zeo3_code[idx], self.y_zeo3_graph[idx], self.y_zeo3_feat[idx], self.y_zeo3_graph_present[idx], self.y_zeo3_feat_present[idx], \
             #    self.y_osda3_smiles[idx], self.y_osda3_graph[idx], self.y_osda3_feat[idx], self.y_osda3_graph_present[idx], self.y_osda3_feat_present[idx], \
 
+    def get_datapoints_by_index(self, dataset_idxs, scaled = True, return_dataframe = False):
+        '''
+        dataset_idxs: List. list of indexes
+        scaled: Bool. Whether to scale the features.
+        return_dataframe: Bool. Whether to return a dataframe or just tensors
+        '''
+
+        if len(dataset_idxs) == 1: # only 1 datapoint
+            result = self[dataset_idxs[0] : dataset_idxs[0]+1] # +1 to get an extra dimension (to be consistent with multiple datapoint dimensions)
+        else: # multiple datapoints
+            lists = [[] for _ in range(len(self[0]))] # create list containing lists, with each list containing n_datapoints of datapoints
+            for dataset_idx in dataset_idxs:
+                datapoint = self[dataset_idx]
+                for info_idx, info in enumerate(datapoint):
+                    lists[info_idx].append(info)
+            result = [torch.stack(info) if type(info[0]) == torch.Tensor else info for info in lists]
+        
+        final_result = []
+        for info in result:
+            if type(info) == torch.Tensor:
+                n_cols = info.shape[1]
+                if n_cols == len(self.frac_names)+2:
+                    if return_dataframe:
+                        info = pd.DataFrame(info, columns=self.frac_names+['cryst_temp', 'cryst_time'])
+                elif n_cols == len(self.ratio_names)+2:
+                    if scaled == False: # scale back
+                        unscaled_info = torch.zeros_like(info)
+                        for ratio_idx, ratio in enumerate(self.ratio_names):
+                            qt = self.qts[ratio] # load quantile transformer
+                            unscaled_info[:,ratio_idx] = torch.tensor(qt.inverse_transform(info[:,ratio_idx].reshape(-1, 1)), dtype=torch.float32)[0] # transform back
+                        info = unscaled_info
+                    if return_dataframe:
+                        info = pd.DataFrame(info, columns=self.ratio_names+['cryst_temp', 'cryst_time'])
+                elif n_cols == len(self.zeo_feat_names):
+                    if scaled == False: # scale back
+                        zeo_feat_scaler = self.zeo_feat_scaler # load standard scaler
+                        info = torch.tensor(zeo_feat_scaler.inverse_transform(info), dtype=torch.float32)
+                    if return_dataframe:
+                        info = pd.DataFrame(info, columns=self.zeo_feat_names)
+                elif n_cols == len(self.osda_feat_names):
+                    if scaled == False: # scale back
+                        osda_feat_scaler = self.osda_feat_scaler
+                        info = torch.tensor(osda_feat_scaler.inverse_transform(info), dtype=torch.float32)
+                    if return_dataframe:
+                        info = pd.DataFrame(info, columns=self.osda_feat_names)
+                final_result.append(info)
+            else:
+                final_result.append(info)
+        return final_result
+
 
     def __len__(self):
         return len(self.x_syn_frac)
     
     def get_system(zeo=None, osda=None):
         '''Get zeolite system'''
-        assert zeo is not None or osda is not None, 'Must specify at least either zeolite or OSDA'
+        assert (zeo is not None) or (osda is not None), 'Must specify at least either zeolite or OSDA'
 
+        # if (zeo is not None) and (osda is None):
+            
+            
 
         pass
 
