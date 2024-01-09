@@ -280,7 +280,7 @@ class ZeoSynGenDataset:
                  zeo_feat_scaler,
 
                  # Feature names
-                 frac_names, ratio_names, zeo_feat_names, osda_feat_names 
+                 frac_names, ratio_names, cond_names, zeo_feat_names, osda_feat_names 
 
                  ):
         self.x_syn_frac, self.x_syn_ratio = x_syn_frac, x_syn_ratio
@@ -300,7 +300,7 @@ class ZeoSynGenDataset:
         self.osda_feat_scaler = osda_feat_scaler
         self.zeo_feat_scaler = zeo_feat_scaler
 
-        self.frac_names, self.ratio_names, self.zeo_feat_names, self.osda_feat_names = frac_names, ratio_names, zeo_feat_names, osda_feat_names
+        self.frac_names, self.ratio_names, self.cond_names, self.zeo_feat_names, self.osda_feat_names = frac_names, ratio_names, cond_names, zeo_feat_names, osda_feat_names
 
     def __getitem__(self, idx):
         return self.x_syn_frac[idx], self.x_syn_ratio[idx], \
@@ -342,16 +342,21 @@ class ZeoSynGenDataset:
                 n_cols = info.shape[1]
                 if n_cols == len(self.frac_names)+2:
                     if return_dataframe:
-                        info = pd.DataFrame(info, columns=self.frac_names+['cryst_temp', 'cryst_time'])
+                        info = pd.DataFrame(info, columns=self.frac_names+self.cond_names)
                 elif n_cols == len(self.ratio_names)+2:
                     if scaled == False: # scale back
                         unscaled_info = torch.zeros_like(info)
                         for ratio_idx, ratio in enumerate(self.ratio_names):
                             qt = self.qts[ratio] # load quantile transformer
-                            unscaled_info[:,ratio_idx] = torch.tensor(qt.inverse_transform(info[:,ratio_idx].reshape(-1, 1)), dtype=torch.float32)[0] # transform back
+                            unscaled_info[:,ratio_idx] = torch.tensor(qt.inverse_transform(info[:,ratio_idx].reshape(-1, 1)), dtype=torch.float32).reshape(-1) # transform back
+                        for cond_idx, cond in enumerate(self.cond_names):
+                            qt = self.qts[cond] # load quantile transformer
+                            cond_idx += len(self.ratio_names)
+                            unscaled_info[:,cond_idx] = torch.tensor(qt.inverse_transform(info[:,cond_idx].reshape(-1, 1)), dtype=torch.float32).reshape(-1) # transform back
+
                         info = unscaled_info
                     if return_dataframe:
-                        info = pd.DataFrame(info, columns=self.ratio_names+['cryst_temp', 'cryst_time'])
+                        info = pd.DataFrame(info, columns=self.ratio_names+self.cond_names)
                 elif n_cols == len(self.zeo_feat_names):
                     if scaled == False: # scale back
                         zeo_feat_scaler = self.zeo_feat_scaler # load standard scaler
@@ -387,6 +392,7 @@ class ZeoSynGenDataset:
             Tuple of lists or tensors or Dataframes for the zeolite-OSDA system
         '''
         assert (zeo is not None) or (osda is not None), 'Must specify at least either zeolite or OSDA.'
+        
         if zeo is not None:
             assert zeo in set(self.y_zeo1_code + self.y_zeo2_code), 'Zeolite code not in dataset. Please ensure your use the only the 3-letter IZA code without hyphens or asterisks (https://america.iza-structure.org/IZA-SC/ftc_table.php)'
         if osda is not None:
