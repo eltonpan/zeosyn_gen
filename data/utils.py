@@ -315,11 +315,15 @@ class ZeoSynGenDataset:
             #    self.y_zeo3_code[idx], self.y_zeo3_graph[idx], self.y_zeo3_feat[idx], self.y_zeo3_graph_present[idx], self.y_zeo3_feat_present[idx], \
             #    self.y_osda3_smiles[idx], self.y_osda3_graph[idx], self.y_osda3_feat[idx], self.y_osda3_graph_present[idx], self.y_osda3_feat_present[idx], \
 
-    def get_datapoints_by_index(self, dataset_idxs, scaled = True, return_dataframe = False):
+    def get_datapoints_by_index(self, dataset_idxs, scaled=True, return_dataframe=False):
         '''
-        dataset_idxs: List. list of indexes
-        scaled: Bool. Whether to scale the features.
-        return_dataframe: Bool. Whether to return a dataframe or just tensors
+        Args:
+            dataset_idxs: List. list of indexes
+            scaled: Bool. Whether to scale the features.
+            return_dataframe: Bool. Whether to return a dataframe or just tensors
+
+        Returns:
+            final_result: Tuple of lists or tensors or Dataframes
         '''
 
         if len(dataset_idxs) == 1: # only 1 datapoint
@@ -363,21 +367,43 @@ class ZeoSynGenDataset:
                 final_result.append(info)
             else:
                 final_result.append(info)
+
         return final_result
 
 
     def __len__(self):
         return len(self.x_syn_frac)
     
-    def get_system(zeo=None, osda=None):
-        '''Get zeolite system'''
-        assert (zeo is not None) or (osda is not None), 'Must specify at least either zeolite or OSDA'
+    def get_system(self, zeo=None, osda=None, scaled=True, return_dataframe=False):
+        '''Get zeolite-OSDA system or just zeolite or just OSDA
 
-        # if (zeo is not None) and (osda is None):
-            
-            
+        Args:
+            zeo: str. Zeolite 3-letter IZA code https://america.iza-structure.org/IZA-SC/ftc_table.php
+            osda: str. OSDA SMILES
+            scaled: Bool. Whether to scale the features.
+            return_dataframe: Bool. Whether to return a dataframe or just tensors
+        
+        Returns:
+            Tuple of lists or tensors or Dataframes for the zeolite-OSDA system
+        '''
+        assert (zeo is not None) or (osda is not None), 'Must specify at least either zeolite or OSDA.'
+        assert zeo in set(self.y_zeo1_code + self.y_zeo2_code), 'Zeolite code not in dataset. Please ensure your use the only the 3-letter IZA code without hyphens or asterisks (https://america.iza-structure.org/IZA-SC/ftc_table.php)'
+        assert osda in set(self.y_osda1_smiles + self.y_osda2_smiles), 'OSDA SMILES not in dataset.'
 
-        pass
+        sys_idxs = [] # indexes of zeo-osda system
+        for datapoint_idx in range(len(self)):
+            if zeo is not None and osda is not None:
+                if (self[datapoint_idx][3] == zeo) and (self[datapoint_idx][13] == osda):
+                    sys_idxs.append(datapoint_idx)
+            elif zeo is not None:
+                if self[datapoint_idx][3] == zeo: # self.y_zeo1_code
+                    sys_idxs.append(datapoint_idx)
+            elif osda is not None:
+                if self[datapoint_idx][13] == osda: # self.y_osda1_smiles
+                    sys_idxs.append(datapoint_idx)
+
+        return self.get_datapoints_by_index(sys_idxs, scaled, return_dataframe)
+
 
     def train_test_split():
         self.train_idxs = None
