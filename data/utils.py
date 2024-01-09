@@ -387,8 +387,10 @@ class ZeoSynGenDataset:
             Tuple of lists or tensors or Dataframes for the zeolite-OSDA system
         '''
         assert (zeo is not None) or (osda is not None), 'Must specify at least either zeolite or OSDA.'
-        assert zeo in set(self.y_zeo1_code + self.y_zeo2_code), 'Zeolite code not in dataset. Please ensure your use the only the 3-letter IZA code without hyphens or asterisks (https://america.iza-structure.org/IZA-SC/ftc_table.php)'
-        assert osda in set(self.y_osda1_smiles + self.y_osda2_smiles), 'OSDA SMILES not in dataset.'
+        if zeo is not None:
+            assert zeo in set(self.y_zeo1_code + self.y_zeo2_code), 'Zeolite code not in dataset. Please ensure your use the only the 3-letter IZA code without hyphens or asterisks (https://america.iza-structure.org/IZA-SC/ftc_table.php)'
+        if osda is not None:
+            assert osda in set(self.y_osda1_smiles + self.y_osda2_smiles), 'OSDA SMILES not in dataset.'
 
         sys_idxs = [] # indexes of zeo-osda system
         for datapoint_idx in range(len(self)):
