@@ -27,7 +27,7 @@ def calculate_tanimoto_similarity(molecule_smiles1, molecule_smiles2, plot=False
     tanimoto_similarity = DataStructs.TanimotoSimilarity(fp1, fp2)
 
     if verbose:
-        print('Similarity:', round(tanimoto_similarity,3))
+        print('Tanimoto similarity:', round(tanimoto_similarity,3))
 
     return tanimoto_similarity
 
