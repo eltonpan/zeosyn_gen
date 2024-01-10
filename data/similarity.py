@@ -13,8 +13,8 @@ def calculate_tanimoto_similarity(molecule_smiles1, molecule_smiles2, plot=False
         raise ValueError("Invalid SMILES string(s)")
 
     # Generate Morgan fingerprints with radius 2 (you can adjust the radius if needed)
-    fp1 = AllChem.GetMorganFingerprintAsBitVect(mol1, 2)
-    fp2 = AllChem.GetMorganFingerprintAsBitVect(mol2, 2)
+    fp1 = AllChem.GetMorganFingerprintAsBitVect(mol1, 3)
+    fp2 = AllChem.GetMorganFingerprintAsBitVect(mol2, 3)
 
     if plot:
         plt.figure()
