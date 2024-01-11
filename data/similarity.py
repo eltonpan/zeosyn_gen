@@ -6,6 +6,7 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 from syn_variables import zeo_cols
+from sklearn.preprocessing import StandardScaler
 
 def calculate_tanimoto_similarity(molecule_smiles1, molecule_smiles2, plot=False, verbose=False):
     '''Calculate Tanimoto similarity between two molecules.'''
@@ -39,6 +40,12 @@ def calculate_tanimoto_similarity(molecule_smiles1, molecule_smiles2, plot=False
 # Load zeolite descriptors
 df_zeo = pd.read_csv('zeolite_descriptors.csv').drop(columns = ['Unnamed: 0'])
 df_zeo = df_zeo[['Code']+zeo_cols] # select specific features
+codes = df_zeo['Code'] # save codes
+
+scaler = StandardScaler()
+df_zeo = pd.DataFrame(scaler.fit_transform(df_zeo.drop(columns=['Code'])), columns=zeo_cols)
+df_zeo['Code'] = codes # add back codes
+
 zeo2feat = {}
 for zeo in df_zeo['Code']:
     zeo2feat[zeo] = np.array(df_zeo[df_zeo['Code'] == zeo][zeo_cols])
@@ -57,9 +64,6 @@ def get_zeolite_similarity(zeo1, zeo2):
     else:
         return None
 
-
-
-
 if __name__ == '__main__':
     # _ = calculate_tanimoto_similarity('CCC[N+](CCC)(CCC)CCC', 'CCC[N+](CCC)(CCC)CCCCCC[N+](CCC)(CCC)CCC')
-    print(get_zeolite_similarity('CHA', 'MWW'))
+    print(get_zeolite_similarity('AEI', 'CHA'))
