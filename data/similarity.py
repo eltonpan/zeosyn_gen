@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+import torch
 
 from syn_variables import zeo_cols
 from sklearn.preprocessing import StandardScaler
@@ -64,6 +65,65 @@ def get_zeolite_similarity(zeo1, zeo2):
     else:
         return None
 
+def maximum_mean_discrepancy(X, Y, kernel_type='gaussian', gamma=None):
+    """
+    Calculate the Maximum Mean Discrepancy (MMD) between two distributions.
+
+    Parameters:
+    - X: Samples from the first distribution (numpy array or PyTorch tensor).
+    - Y: Samples from the second distribution (numpy array or PyTorch tensor).
+    - kernel_type: Type of kernel function ('linear', 'gaussian', etc.).
+    - gamma: Parameter for the Gaussian kernel (if kernel_type is 'gaussian').
+
+    Returns:
+    - mmd: Maximum Mean Discrepancy between X and Y.
+    """
+    X, Y = np.asarray(X), np.asarray(Y)
+
+    if isinstance(X, np.ndarray) and isinstance(Y, np.ndarray):
+        X, Y = torch.from_numpy(X), torch.from_numpy(Y)
+
+    if not torch.is_tensor(X):
+        raise ValueError("Input X should be a numpy array or a PyTorch tensor.")
+
+    if not torch.is_tensor(Y):
+        raise ValueError("Input Y should be a numpy array or a PyTorch tensor.")
+
+    if X.dim() != 2 or Y.dim() != 2:
+        raise ValueError("Input tensors should be 2-dimensional.")
+
+    if X.size(1) != Y.size(1):
+        raise ValueError("Input tensors should have the same number of features.")
+
+    if kernel_type == 'linear':
+        K_XX = torch.mm(X, X.t())
+        K_YY = torch.mm(Y, Y.t())
+        K_XY = torch.mm(X, Y.t())
+
+    elif kernel_type == 'gaussian':
+        if gamma is None:
+            gamma = 1.0 / X.size(1)  # Default value for gamma
+
+        X_norm = torch.sum(X * X, dim=1).unsqueeze(1)
+        Y_norm = torch.sum(Y * Y, dim=1).unsqueeze(1)
+
+        K_XX = torch.exp(-gamma * (X_norm - 2 * torch.mm(X, X.t()) + X_norm.t()))
+        K_YY = torch.exp(-gamma * (Y_norm - 2 * torch.mm(Y, Y.t()) + Y_norm.t()))
+        K_XY = torch.exp(-gamma * (X_norm - 2 * torch.mm(X, Y.t()) + Y_norm.t()))
+    else:
+        raise ValueError("Unsupported kernel type. Supported types are 'linear' and 'gaussian'.")
+
+    mmd = torch.mean(K_XX) - 2 * torch.mean(K_XY) + torch.mean(K_YY)
+    
+    return mmd.item()
+
 if __name__ == '__main__':
     # _ = calculate_tanimoto_similarity('CCC[N+](CCC)(CCC)CCC', 'CCC[N+](CCC)(CCC)CCCCCC[N+](CCC)(CCC)CCC')
-    print(get_zeolite_similarity('AEI', 'CHA'))
+    # print(get_zeolite_similarity('AEI', 'CHA'))
+    print(maximum_mean_discrepancy(np.array([[0. ,1.],
+                                             [0. ,0.],
+                                             [0., 2.]]),
+                                    np.array([[0. ,1.],
+                                             [1. ,0.]])
+                                             )
+                                             )
