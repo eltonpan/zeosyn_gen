@@ -38,7 +38,7 @@ def preprocess_gel(df, x, y, quantile, plot = False):
         df.loc[idx, ratio] = 0. # set to 0.0
 
     # Fix infs
-    idxs = df[df[ratio] == np.inf].index # NaNs from 0.0/0.0
+    idxs = df[df[ratio] == np.inf].index # Inf from by non-zero divided by zero
     high_val = np.quantile(df[(df[ratio] != np.inf) & (df[ratio] != 0.)][ratio], quantile)
     print(ratio)
     print('High val:', high_val)
@@ -420,3 +420,96 @@ class ZeoSynGenDataset:
         self.train_dataset = None
         self.val_dataset = None
         self.test_dataset = None
+
+def plot_gel_conds(x_syn_ratio, label=None):
+    '''
+    Args:
+        x_syn_ratio: (pd.DataFrame) with columns of synthesis conditions
+        label: (str) label for the plot
+    '''
+    xlims = {'Si/Al': [-5,410],
+                'Al/P': [-0.1,1.8],
+                'Si/Ge': [-5,100],
+                'Si/B': [-10,260],
+                'Na/T': [-0.2,2],
+                'K/T': [-0.5,5.4],
+                'OH/T': [-0.1,2.5],
+                'F/T': [-0.05,1.3],
+                'H2O/T': [-10,210],
+                'sda1/T': [-0.3,7],
+                'cryst_temp': [0,250],
+                'cryst_time': [0,1000],
+                }
+    fontsize = 15
+    fig = plt.figure(figsize=(6/3*len(x_syn_ratio.columns),3), dpi = 100)
+    col_idx = 1
+    for col_name in x_syn_ratio.columns:
+        ax = fig.add_subplot(1, len(x_syn_ratio.columns), col_idx)
+        sns.histplot(x_syn_ratio[col_name], label=label, bins=30, binrange=xlims[col_name])
+        
+        ax.yaxis.set_tick_params(labelleft=False)
+        plt.xlim(*xlims[col_name])
+        plt.xlabel(col_name, fontsize=fontsize)
+        if col_idx > 1:
+            plt.ylabel('')
+        else:
+            plt.ylabel('Density', fontsize=fontsize)
+        col_idx += 1
+    plt.legend()
+    plt.show()
+
+def compare_gel_conds(x_syn_ratio1, x_syn_ratio2, kde=False):
+    '''
+    Args:
+        x_syn_ratio1: (pd.DataFrame) with columns of synthesis conditions
+        x_syn_ratio2: (pd.DataFrame) with columns of synthesis conditions
+        kde (bool): whether to plot kde on top of histogram
+        
+    '''
+    fontsize = 15
+    fig = plt.figure(figsize=(6/3*len(x_syn_ratio1.columns),3), dpi = 100)
+    col_idx = 1
+    for col_name in x_syn_ratio1.columns:
+        ax = fig.add_subplot(1, len(x_syn_ratio1.columns), col_idx)
+        col_max = max(x_syn_ratio1[col_name].max(), x_syn_ratio2[col_name].max())
+        col_min = min(x_syn_ratio1[col_name].min(), x_syn_ratio2[col_name].min())
+
+        if kde:
+            sns.histplot(x_syn_ratio1[col_name], label=f'OSDA 1 (N: {len(x_syn_ratio1)})', kde=kde, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color = 'tab:blue', )
+            sns.histplot(x_syn_ratio2[col_name], label=f'OSDA 2 (N: {len(x_syn_ratio2)})', kde=kde, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color = 'tab:orange')
+        else:
+            sns.histplot(x_syn_ratio1[col_name], label=f'OSDA 1 (N: {len(x_syn_ratio1)})', bins=20, binrange=[col_min, col_max], color = 'tab:blue', )
+            sns.histplot(x_syn_ratio2[col_name], label=f'OSDA 2 (N: {len(x_syn_ratio2)})', bins=20, binrange=[col_min, col_max], color = 'tab:orange')
+
+        
+        ax.yaxis.set_tick_params(labelleft=False)
+        plt.xlabel(col_name, fontsize=fontsize, labelpad=5)
+        if col_idx > 1:
+            plt.ylabel('')
+        else:
+            plt.ylabel('Density', fontsize=fontsize)
+        
+        # Relabel high values to inf in xticks
+        high_val = {'Si/Al': 400.000, 'Al/P': 1.717, 'Si/Ge': 98.999, 'Si/B': 250.000} # maps col_name to high value
+        plt.xticks(rotation=45)
+        if col_name in high_val.keys(): # only if col_name is in high_val
+            if (high_val[col_name]+1e-3 >= col_min) and (high_val[col_name]-1e-3 <= col_max): # only if high value is within range
+                xticks = list(ax.get_xticks()) # get current xticks
+                if high_val[col_name] not in xticks: # only if high value is not in xticks
+                    xticks.append(high_val[col_name])
+                xticks = sorted(xticks) # sort xticks
+                xticks_w_inf = [] 
+                for x in xticks:
+                    if x == high_val[col_name]:
+                        xticks_w_inf.append(r"$\infty$") # inf if xtick = high val
+                    elif x >= high_val[col_name]:
+                        xticks_w_inf.append('') # empty string if xtick > high val
+                    else:
+                        xticks_w_inf.append(x)
+                xticks_w_inf[0] = '' # ad-hoc: Reduce congestion in xticks
+                plt.xticks(xticks, labels=xticks_w_inf)
+
+        col_idx += 1
+
+    plt.legend()
+    plt.show()

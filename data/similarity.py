@@ -51,6 +51,20 @@ zeo2feat = {}
 for zeo in df_zeo['Code']:
     zeo2feat[zeo] = np.array(df_zeo[df_zeo['Code'] == zeo][zeo_cols])
 
+def visualize_smiles(smiles_list):
+    '''Visualize SMILES strings of molecules.
+    
+    Args:
+        smiles_list. List of SMILES strings.
+    '''
+
+    mol_list = [Chem.MolFromSmiles(s) for s in smiles_list]
+
+    plt.figure(dpi = 100)
+    plt.imshow(Draw.MolsToImage(mol_list))
+    plt.axis('off')
+    plt.show()
+
 def get_zeolite_similarity(zeo1, zeo2):
 
     if (zeo1 in zeo2feat.keys()) and (zeo2 in zeo2feat.keys()):
