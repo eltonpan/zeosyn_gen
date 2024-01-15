@@ -467,10 +467,11 @@ def compare_gel_conds(x_syn_ratio1, x_syn_ratio2, kde=False, common_norm=False):
         common_norm: Bool. for two plots to have the same normalized area.
         
     '''
-    if common_norm=True:
+    if common_norm:
         stat = 'probabilty'
     else:
         stat = 'count'
+
     fontsize = 15
     fig = plt.figure(figsize=(6/3*len(x_syn_ratio1.columns),3), dpi = 100)
     col_idx = 1

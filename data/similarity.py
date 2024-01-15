@@ -8,7 +8,15 @@ import torch
 
 from syn_variables import zeo_cols
 from sklearn.preprocessing import StandardScaler
+from ast import literal_eval
 import pdb
+
+def clean_cbus(cbu_str):
+    # This fixes cbus column contains a str representation of list, instead of list itself #
+    if type(cbu_str) == str: # if str
+        return literal_eval(cbu_str)
+    else: # if not str, eg. NaN
+        cbu_str
 
 def calculate_tanimoto_similarity(molecule_smiles1, molecule_smiles2, plot=False, verbose=False):
     '''Calculate Tanimoto similarity between two molecules.'''
@@ -39,7 +47,7 @@ def calculate_tanimoto_similarity(molecule_smiles1, molecule_smiles2, plot=False
 
     return tanimoto_similarity
 
-# Load zeolite descriptors
+# Zeolite physicochemical descriptors 
 df_zeo = pd.read_csv('zeolite_descriptors.csv').drop(columns = ['Unnamed: 0'])
 df_zeo = df_zeo[['Code']+zeo_cols] # select specific features
 codes = df_zeo['Code'] # save codes
@@ -50,6 +58,7 @@ zeo2feat = {}
 for zeo in df_zeo['Code']:
     zeo2feat[zeo] = np.array(df_zeo[df_zeo['Code'] == zeo][zeo_cols])
 
+# Zeolite EGNN
 df_zeo_egnn = pd.read_csv('CVAE_EGNN_embeddings_2023-07-13.csv').drop(columns = ['Unnamed: 0'])
 # egnn_cols = df_zeo_egnn.drop(columns=['Code']).columns
 # codes = df_zeo_egnn['Code'] # save codes
@@ -59,6 +68,28 @@ df_zeo_egnn = pd.read_csv('CVAE_EGNN_embeddings_2023-07-13.csv').drop(columns = 
 zeo2egnn = {}
 for zeo in df_zeo_egnn['Code']:
     zeo2egnn[zeo] = np.array(df_zeo_egnn[df_zeo_egnn['Code'] == zeo].drop(columns=['Code']))
+
+# Zeolite binding energies
+df_zeo = pd.read_csv('zeolite_binding_energy.csv').drop(columns = ['Unnamed: 0'])
+codes = df_zeo['zeo'] # save codes
+scaler = StandardScaler()
+df_zeo = pd.DataFrame(scaler.fit_transform(df_zeo.drop(columns=['zeo'])))
+df_zeo['zeo'] = codes
+zeo2be = {}
+for zeo in df_zeo['zeo']:
+    zeo2be[zeo] = np.array(df_zeo[df_zeo['zeo'] == zeo].drop(columns=['zeo']))
+
+# # Zeolite CBUs
+# df_cbu = pd.read_csv('cbus.csv').rename(columns = {'Unnamed: 0': 'Code'})
+# df_cbu['cbu'] = list(map(clean_cbus, df_cbu['cbu'].values))
+# cbus_unique = []
+# for cbus in df_cbu['cbu'].values:
+#     for cbu in cbus:
+#         cbus_unique.append(cbu)
+# cbus_unique = set(cbus_unique)
+# cbu_oh = np.zeros([len(df_without_na), len(cbus_unique)])
+# pdb.set_trace()
+
 
 def visualize_smiles(smiles_list):
     '''Visualize SMILES strings of molecules.
@@ -74,33 +105,27 @@ def visualize_smiles(smiles_list):
     plt.axis('off')
     plt.show()
 
-def get_zeolite_similarity(zeo1, zeo2, feat_type = 'physicochemical'):
+def get_zeolite_similarity(zeo1, zeo2, feat_type='physicochemical'):
 
-    assert feat_type in ['physicochemical', 'egnn'], 'feat_type must be either physicochemical or egnn'
+    assert feat_type in ['physicochemical', 'egnn', 'be'], 'feat_type must be either physicochemical or egnn or be'
 
     if feat_type == 'physicochemical':
-        if (zeo1 in zeo2feat.keys()) and (zeo2 in zeo2feat.keys()):
-            zeo1 = zeo2feat[zeo1]
-            zeo2 = zeo2feat[zeo2]
-        
-            # 2A) Mean cosine similarity of all pair of zeos
-            zeo_sim = cosine_similarity(zeo1, zeo2)[0][0]
-            return zeo_sim
-
-        else:
-            return None
-
+        mapping = zeo2feat
     elif feat_type == 'egnn':
-        if (zeo1 in zeo2egnn.keys()) and (zeo2 in zeo2egnn.keys()):
-            zeo1 = zeo2egnn[zeo1]
-            zeo2 = zeo2egnn[zeo2]
+        mapping = zeo2egnn
+    elif feat_type == 'be':
+        mapping = zeo2be
 
-            # 2A) Mean cosine similarity of all pair of zeos
-            zeo_sim = cosine_similarity(zeo1, zeo2)[0][0]
-            return zeo_sim
-            
-        else:
-            return None
+    if (zeo1 in mapping.keys()) and (zeo2 in mapping.keys()):
+        zeo1 = mapping[zeo1]
+        zeo2 = mapping[zeo2]
+        # 2A) Mean cosine similarity of all pair of zeos
+        zeo_sim = cosine_similarity(zeo1, zeo2)[0][0]
+        return zeo_sim
+    else:
+        return None
+
+
 
 
 def maximum_mean_discrepancy(X, Y, kernel_type='gaussian', gamma=None):
@@ -157,7 +182,7 @@ def maximum_mean_discrepancy(X, Y, kernel_type='gaussian', gamma=None):
 
 if __name__ == '__main__':
     # _ = calculate_tanimoto_similarity('CCC[N+](CCC)(CCC)CCC', 'CCC[N+](CCC)(CCC)CCCCCC[N+](CCC)(CCC)CCC')
-    print(get_zeolite_similarity('CHA', 'AEI', feat_type = 'egnn'))
+    print(get_zeolite_similarity('CHA', 'AEI', feat_type = 'be'))
     # print(maximum_mean_discrepancy(np.array([[0. ,1.],
     #                                          [0. ,0.],
     #                                          [0., 2.]]),
