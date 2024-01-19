@@ -79,6 +79,9 @@ zeo2be = {}
 for zeo in df_zeo['zeo']:
     zeo2be[zeo] = np.array(df_zeo[df_zeo['zeo'] == zeo].drop(columns=['zeo']))
 
+# Zeolite graph distance
+df_zeo_graph = pd.read_csv('zeolite_graph_distance.csv')
+
 # # Zeolite CBUs
 # df_cbu = pd.read_csv('cbus.csv').rename(columns = {'Unnamed: 0': 'Code'})
 # df_cbu['cbu'] = list(map(clean_cbus, df_cbu['cbu'].values))
@@ -107,23 +110,38 @@ def visualize_smiles(smiles_list):
 
 def get_zeolite_similarity(zeo1, zeo2, feat_type='physicochemical'):
 
-    assert feat_type in ['physicochemical', 'egnn', 'be'], 'feat_type must be either physicochemical or egnn or be'
+    assert feat_type in ['physicochemical', 'egnn', 'be', 'graph', 'soap'], "feat_type must be one of the following: 'physicochemical', 'egnn', 'be', 'graph', 'soap'"
 
-    if feat_type == 'physicochemical':
-        mapping = zeo2feat
-    elif feat_type == 'egnn':
-        mapping = zeo2egnn
-    elif feat_type == 'be':
-        mapping = zeo2be
-
-    if (zeo1 in mapping.keys()) and (zeo2 in mapping.keys()):
-        zeo1 = mapping[zeo1]
-        zeo2 = mapping[zeo2]
-        # 2A) Mean cosine similarity of all pair of zeos
-        zeo_sim = cosine_similarity(zeo1, zeo2)[0][0]
-        return zeo_sim
+    if feat_type in ['graph', 'soap']:
+        zeo1, zeo2 = sorted([zeo1, zeo2]) # because the csv file is triangular i.e. lower character comes first eg. (AEI, CHA) not (CHA, AEI)
+        
+        if zeo1 == zeo2:
+            return 0.
+        else:
+            if (zeo1 in df_zeo_graph['Zeo1'].tolist()) and (zeo2 in df_zeo_graph['Zeo2'].tolist()):
+                if feat_type == 'graph':
+                    return df_zeo_graph[(df_zeo_graph['Zeo1']==zeo1) & (df_zeo_graph['Zeo2']==zeo2)]['D'].item()
+                elif feat_type == 'soap':
+                    return df_zeo_graph[(df_zeo_graph['Zeo1']==zeo1) & (df_zeo_graph['Zeo2']==zeo2)]['SOAP'].item()
+            else:
+                return None
     else:
-        return None
+
+        if feat_type == 'physicochemical':
+            mapping = zeo2feat
+        elif feat_type == 'egnn':
+            mapping = zeo2egnn
+        elif feat_type == 'be':
+            mapping = zeo2be
+
+        if (zeo1 in mapping.keys()) and (zeo2 in mapping.keys()):
+            zeo1 = mapping[zeo1]
+            zeo2 = mapping[zeo2]
+            # 2A) Mean cosine similarity of all pair of zeos
+            zeo_sim = cosine_similarity(zeo1, zeo2)[0][0]
+            return zeo_sim
+        else:
+            return None
 
 
 
@@ -182,7 +200,7 @@ def maximum_mean_discrepancy(X, Y, kernel_type='gaussian', gamma=None):
 
 if __name__ == '__main__':
     # _ = calculate_tanimoto_similarity('CCC[N+](CCC)(CCC)CCC', 'CCC[N+](CCC)(CCC)CCCCCC[N+](CCC)(CCC)CCC')
-    print(get_zeolite_similarity('CHA', 'AEI', feat_type = 'be'))
+    print(get_zeolite_similarity('CHA', 'AEI', feat_type = 'soap'))
     # print(maximum_mean_discrepancy(np.array([[0. ,1.],
     #                                          [0. ,0.],
     #                                          [0., 2.]]),
