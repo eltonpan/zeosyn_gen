@@ -1,0 +1,258 @@
+,cbu
+CLO,"['d4r', 'clo', 'lta']"
+CHI,[]
+IFU,"['d4r', 'ddr']"
+ITN,"['mor', 'bea', 'stf', 'mtw']"
+IRY,"['d3r', 'd4r', 'ddr']"
+ITV,"['d4r', 'lau']"
+EWT,[]
+NES,"['cas', 'non', 'ton']"
+PAR,[]
+SVY,"['d6r', 'mel']"
+RON,"['vsv', 'lau']"
+SVR,"['mor', 'mfi']"
+SSO,"['mor', 'jbw', 'cas', 'bik', 'mtw']"
+WEN,"['d6r', 'can', 'dsc']"
+SFV,"['mor', 'mfi', 'mel']"
+LIT,['abw']
+IFT,"['d4r', 'd3r']"
+PON,[]
+OSI,"['ats', 'lau', 'dzc']"
+SFG,['mel']
+FRA,"['can', 'sod', 'los']"
+SAS,['d6r']
+HEU,['bre']
+POS,"['d4r', 'lau', 'mel', 'stf']"
+IWS,"['mor', 'd4r', 'lau', 'mtw', 'mel']"
+LEV,"['d6r', 'lev']"
+TSC,"['d6r', 'd8r', 'sod', 'lta']"
+ZON,['sti']
+SAO,"['sti', 'lau', 'aww', 'dsc']"
+ASV,"['d4r', 'lau']"
+MTN,['mtn']
+IMF,"['mor', 'mtt', 'ats', 'stf', 'fer', 'imf', 'imf']"
+JOZ,['lov']
+FAU,"['d6r', 'sod']"
+SFN,"['jbw', 'cas', 'mtw', 'dzc']"
+ATT,"['abw', 'gis', 'dcc', 'dsc']"
+ETR,[]
+NAT,['nat']
+SOR,"['d4r', 'mtw']"
+STI,"['sti', 'bre']"
+ITR,"['d4r', 'stf', 'lau']"
+GME,"['d6r', 'gme', 'dcc']"
+PWN,"['d8r', 'mwf', 'pau', 'lta']"
+BSV,[]
+OSO,['lov']
+BRE,['bre']
+AFY,"['d4r', 'afy']"
+SOS,[]
+MSE,"['mor', 'bea', 'mtw']"
+LTF,['gme']
+PUN,"['lov', 'vsv', 'dcc']"
+UOE,"['d4r', 'mtw']"
+MER,"['d8r', 'pau', 'dcc']"
+NSI,"['cas', 'bik']"
+SZR,"['mtt', 'd6r', 'mso']"
+SBS,"['sti', 'd6r', 'can']"
+IRN,['d4r']
+EUO,"['cas', 'non']"
+UOZ,"['d4r', 'lau']"
+MOZ,"['d6r', 'can', 'pau', 'ltl', 'dsc']"
+SBE,"['sti', 'd8r', 'atn']"
+IHW,"['cas', 'non', 'ton']"
+TON,"['jbw', 'mtt', 'bik', 'ton']"
+NAB,"['lov', 'vsv']"
+SBN,['vsv']
+ITW,['d4r']
+JNT,[]
+JSN,['sti']
+MAR,"['can', 'sod', 'lio']"
+AFG,"['can', 'lio']"
+LTA,"['d4r', 'sod', 'lta']"
+GOO,[]
+IFW,['rte']
+LTJ,[]
+VNI,['vsv']
+ESV,[]
+UFI,"['d4r', 'rth', 'lta']"
+JST,['lov']
+APC,['dcc']
+MSO,"['lau', 'd6r', 'mso']"
+ITE,['rth']
+SVV,"['d4r', 'rte', 'rut', 'ast']"
+CAN,"['can', 'dzc']"
+ISV,"['mor', 'd4r', 'mtw']"
+VET,['cas']
+CAS,"['cas', 'bik']"
+ITH,"['d4r', 'stf', 'lau', 'mel']"
+ERI,"['d6r', 'can']"
+TUN,"['mor', 'mtt', 'stf', 'lau', 'cas']"
+RTE,['rte']
+UEI,['dcc']
+AET,"['afi', 'bog', 'nsc', 'dnc']"
+EZT,"['lau', 'bph']"
+MTW,"['jbw', 'cas', 'bik', 'mtw']"
+OFF,"['d6r', 'can', 'gme', 'dsc']"
+JSR,"['lov', 'd6r']"
+UTL,"['mor', 'd4r', 'cas', 'fer', 'non', 'ton', 'ton']"
+ATV,"['afi', 'bog', 'nsc']"
+MRT,"['phi', 'dsc']"
+SOD,['sod']
+EMT,"['d6r', 'sod']"
+THO,['nat']
+FAR,"['can', 'sod', 'lio']"
+SAT,"['d6r', 'can']"
+LOS,"['can', 'los']"
+RRO,['bre']
+IFO,['lau']
+CFI,"['mtt', 'cas', 'ton', 'dzc']"
+SAV,['d6r']
+BEC,"['mor', 'd4r', 'mtw']"
+ITT,"['d4r', 'mel']"
+MAZ,"['gme', 'dsc']"
+SFO,['sti']
+SFH,"['afi', 'cas', 'mtw', 'dzc']"
+BCT,['lau']
+ABW,"['abw', 'dzc']"
+DFO,"['sti', 'd4r', 'bog', 'lau']"
+LTL,"['d6r', 'can', 'ltl', 'dsc']"
+BEA,"['mor', 'bea', 'mtw']"
+CON,"['bea', 'bre', 'lau', 'mel']"
+MWF,"['d8r', 'gis', 'mwf', 'pau', 'lta', 'phi', 'phi']"
+MFS,"['mor', 'mtt', 'fer']"
+CGF,"['mei', 'bog']"
+IWW,"['mor', 'd4r', 'bre', 'stf', 'mel']"
+PAU,"['d8r', 'gis', 'pau', 'lta', 'phi', 'mwf', 'mwf']"
+AHT,"['bog', 'dnc']"
+WEI,"['lov', 'vsv']"
+AFV,"['d6r', 'lev', 'cha']"
+AVE,"['d6r', 'can', 'lev', 'ave']"
+TOL,"['can', 'los', 'lio']"
+UOV,"['d4r', 'mor', 'bre', 'lau', 'stf', 'mel', 'mtw', 'mel', 'mtw']"
+UOS,"['d4r', 'mtw']"
+IRR,"['d4r', 'mel', 'd3r']"
+MFI,"['mor', 'cas', 'mfi', 'mel']"
+USI,"['mei', 'bog', 'dzc']"
+ITG,"['d4r', 'mel', 'stf', 'mtw', 'mor', 'bre', 'bre']"
+AFN,['mei']
+IFR,"['bea', 'lau']"
+GIU,"['can', 'sod']"
+SFE,"['jbw', 'mtt', 'bik', 'ton', 'dzc']"
+STO,"['ats', 'afs', 'bog', 'mel', 'imf', 'doh', 'dcc', 'nsc']"
+EEI,"['non', 'cas']"
+CDO,"['mor', 'fer']"
+LAU,"['bog', 'lau']"
+OKO,"['mor', 'cas', 'fer', 'non', 'ton']"
+APD,['nsc']
+RHO,"['d8r', 'lta']"
+AWW,"['aww', 'clo']"
+CHA,"['d6r', 'cha']"
+DFT,['nsc']
+EWS,"['mor', 'fer']"
+SFW,"['d6r', 'gme']"
+MRE,"['afi', 'mel', 'imf']"
+SFS,"['mor', 'cas', 'mel']"
+MVY,[]
+PCR,"['mor', 'mtt', 'ton', 'mso', 'pcr']"
+JBW,"['jbw', 'abw', 'dzc']"
+MWW,"['d6r', 'mel']"
+IFY,"['d4r', 'sti', 'sod']"
+EON,"['mor', 'gme', 'dsc']"
+MTF,['mfi']
+ETL,"['mor', 'bik']"
+GON,"['cas', 'mtw']"
+MON,[]
+SBT,"['sti', 'd6r', 'can']"
+CZP,[]
+BOG,"['bre', 'bog', 'cas']"
+PWW,['bre']
+AWO,['dcc']
+SSF,"['d6r', 'mtw', 'mel', 'mso']"
+RWR,['mor']
+KFI,"['d6r', 'pau', 'lta']"
+BOZ,"['lov', 'boz']"
+AEN,[]
+BIK,['bik']
+JSW,[]
+FER,"['mor', 'fer', 'pcr']"
+RWY,[]
+RTH,['rth']
+POR,"['d4r', 'phi']"
+MTT,"['jbw', 'mtt', 'bik', 'ton']"
+ATN,"['atn', 'dzc']"
+AFT,"['d6r', 'gme', 'cha', 'aft']"
+STT,"['bea', 'cas']"
+RUT,"['rte', 'rut']"
+VSV,"['lov', 'vsv']"
+PHI,"['phi', 'dcc']"
+AFS,"['afs', 'bph', 'afy']"
+NPT,"['lov', 'vsv', 'obw']"
+OBW,"['lov', 'vsv', 'obw', 'boz']"
+STF,"['stf', 'cas']"
+LTN,"['d6r', 'can', 'sod', 'lta']"
+LOV,"['lov', 'vsv']"
+MEL,"['mor', 'mfi', 'mel']"
+YUG,[]
+SOV,"['d4r', 'stf', 'lau', 'mor', 'mtw']"
+OWE,"['sti', 'dsc']"
+SGT,[]
+BOF,['mel']
+AEI,['d6r']
+AFX,"['d6r', 'gme', 'aft']"
+NPO,[]
+ANA,[]
+VFI,"['afi', 'bog', 'dnc']"
+AST,"['d4r', 'ast']"
+PWO,['bre']
+BPH,"['afs', 'bph']"
+IWR,"['d4r', 'bre', 'lau', 'mel']"
+MEP,['mtn']
+STW,['d4r']
+SSY,"['jbw', 'mtt', 'ton', 'dzc']"
+SEW,"['bea', 'afs', 'lau']"
+AEL,"['afi', 'bog', 'nsc']"
+AVL,"['d6r', 'gme']"
+SFF,"['stf', 'cas']"
+EDI,['nat']
+CGS,[]
+LIO,"['can', 'los', 'lio']"
+DAC,['mor']
+SOF,['d4r']
+ATS,"['ats', 'dzc']"
+NON,['non']
+SIV,"['gis', 'phi', 'dcc']"
+EAB,"['d6r', 'gme', 'eab']"
+MOR,['mor']
+AFR,['sti']
+CSV,"['sti', 'cas', 'mtw']"
+ATO,['lau']
+AFI,"['afi', 'bog', 'nsc']"
+GIS,"['gis', 'dcc']"
+MEI,['mei']
+EPI,['mor']
+SWY,"['gme', 'd6r', 'can']"
+TER,"['bre', 'bog', 'cas']"
+ACO,['d4r']
+SAF,"['afi', 'bog', 'nsc']"
+JRY,['bog']
+CTH,"['d4r', 'non', 'cas']"
+PCS,"['non', 'mor', 'mso', 'pcr']"
+BEB,[]
+EWO,"['mtt', 'mso', 'ton']"
+PTY,['bre']
+ETV,"['mei', 'bre']"
+UWY,"['d4r', 'stf', 'lau']"
+IWV,"['d4r', 'cas', 'non', 'ton']"
+PTT,"['d6r', 'sod', 'lev']"
+PTO,[]
+ANO,"['d6r', 'can', 'gme', 'ave', 'eab']"
+ZEO-1,"['mor', 'sti', 'bea', 'mel', 'mtw']"
+RSN,"['lov', 'vsv']"
+DOH,"['mtn', 'doh']"
+DDR,"['ddr', 'mtn']"
+AFO,"['afi', 'bog', 'nsc']"
+YFI,"['mor', 'mtt', 'mel', 'mtw', 'd8r']"
+PSI,"['afi', 'bog', 'nsc']"
+DON,"['afi', 'mel', 'dcc']"
+SYT,"['d4r', 'clo']"
