@@ -468,7 +468,7 @@ def compare_gel_conds(x_syn_ratio1, x_syn_ratio2, kde=False, common_norm=False):
         
     '''
     if common_norm:
-        stat = 'probabilty'
+        stat = 'proportion'
     else:
         stat = 'count'
 
