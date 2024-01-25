@@ -458,35 +458,37 @@ def plot_gel_conds(x_syn_ratio, label=None):
     plt.legend()
     plt.show()
 
-def compare_gel_conds(x_syn_ratio1, x_syn_ratio2, kde=False, common_norm=False):
+def compare_gel_conds(x_syn_ratios, labels, kde=False, common_norm=False):
     '''
     Args:
-        x_syn_ratio1: (pd.DataFrame) with columns of synthesis conditions
-        x_syn_ratio2: (pd.DataFrame) with columns of synthesis conditions
+        x_syn_ratios: (List of pd.DataFrames) with columns of synthesis conditions. Each DataFrame should be have shape [n_datapoints, n_gel_comp + n_reaction_cond]
+        labels: (List of str) legend labels for the above DataFrame(s). Must be same length as x_syn_ratios
         kde (bool): whether to plot kde on top of histogram
         common_norm: Bool. for two plots to have the same normalized area.
         
     '''
+    assert len(x_syn_ratios) == len(labels), 'Number of DataFrames must be equal to number of legend labels.'
+
     if common_norm:
         stat = 'proportion'
     else:
         stat = 'count'
 
     fontsize = 15
-    fig = plt.figure(figsize=(6/3*len(x_syn_ratio1.columns),3), dpi = 100)
+    fig = plt.figure(figsize=(6/3*len(x_syn_ratios[0].columns),3), dpi = 100)
     col_idx = 1
-    for col_name in x_syn_ratio1.columns:
-        ax = fig.add_subplot(1, len(x_syn_ratio1.columns), col_idx)
-        col_max = max(x_syn_ratio1[col_name].max(), x_syn_ratio2[col_name].max())
-        col_min = min(x_syn_ratio1[col_name].min(), x_syn_ratio2[col_name].min())
+    colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink']
+    for col_name in x_syn_ratios[0].columns:
+        ax = fig.add_subplot(1, len(x_syn_ratios[0].columns), col_idx)
+        col_max = max([x_syn_ratio[col_name].max() for x_syn_ratio in x_syn_ratios])
+        col_min= min([x_syn_ratio[col_name].min() for x_syn_ratio in x_syn_ratios])
 
         if kde:
-            sns.histplot(x_syn_ratio1[col_name], label=f'OSDA 1 (N: {len(x_syn_ratio1)})', kde=kde, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color = 'tab:blue', stat=stat)
-            sns.histplot(x_syn_ratio2[col_name], label=f'OSDA 2 (N: {len(x_syn_ratio2)})', kde=kde, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color = 'tab:orange', stat=stat)
+            for x_syn_ratio, label, color in zip(x_syn_ratios, labels, colors):
+                sns.histplot(x_syn_ratio[col_name], label=label, kde=kde, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color = color, stat=stat)
         else:
-            sns.histplot(x_syn_ratio1[col_name], label=f'OSDA 1 (N: {len(x_syn_ratio1)})', bins=20, binrange=[col_min, col_max], color = 'tab:blue', stat=stat)
-            sns.histplot(x_syn_ratio2[col_name], label=f'OSDA 2 (N: {len(x_syn_ratio2)})', bins=20, binrange=[col_min, col_max], color = 'tab:orange', stat=stat)
-
+            for x_syn_ratio, label, color in zip(x_syn_ratios, labels, colors):
+                sns.histplot(x_syn_ratio[col_name], label=label, bins=20, binrange=[col_min, col_max], color = color, stat=stat)
         
         ax.yaxis.set_tick_params(labelleft=False)
         plt.xlabel(col_name, fontsize=fontsize, labelpad=5)
