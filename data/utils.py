@@ -461,6 +461,49 @@ class ZeoSynGenDataset:
             print('train:', len(self.random_train_idxs), 'val:', len(self.random_val_idxs), 'test:', len(self.random_test_idxs))
         
             return self.random_train_idxs, self.random_val_idxs, self.random_test_idxs
+        
+        elif mode == 'system':
+            # Get all datapoints from dataset object
+            all_datapoints = self.get_datapoints_by_index([x for x in range(len(self))], scaled=False, return_dataframe=True)
+
+            # Create DataFrame with all datapoints
+            df = all_datapoints[1]
+            df['zeo'] = all_datapoints[3]
+            df['osda'] = all_datapoints[13]
+
+            df = df.loc[idxs] # Filter out datapoints with no graph/feature present for either zeolite and OSDA
+
+            self.systems = list(df[['zeo', 'osda']].value_counts().index)
+            self.train_systems, self.test_systems = train_test_split(self.systems, test_size=0.2, random_state=random_state)
+            self.train_systems, self.val_systems = train_test_split(self.train_systems, test_size=0.125, random_state=random_state)
+
+            print('SYSTEMS:')
+            print('train:', len(self.train_systems), 'val:', len(self.val_systems), 'test:', len(self.test_systems))
+            print()
+
+            self.sys_train_idxs, self.sys_val_idxs, self.sys_test_idxs = [], [], []
+
+            for system in self.train_systems:
+                zeo, osda = system
+                system_idxs = list(df[(df['zeo']==zeo) & (df['osda']==osda)].index)
+                self.sys_train_idxs += system_idxs
+            for system in self.val_systems:
+                zeo, osda = system
+                system_idxs = list(df[(df['zeo']==zeo) & (df['osda']==osda)].index)
+                self.sys_val_idxs += system_idxs
+            for system in self.test_systems:
+                zeo, osda = system
+                system_idxs = list(df[(df['zeo']==zeo) & (df['osda']==osda)].index)
+                self.sys_test_idxs += system_idxs
+
+            print('n_datapoints:')
+            print('train:', len(self.sys_train_idxs), 'val:', len(self.sys_val_idxs), 'test:', len(self.sys_test_idxs))
+
+            return self.sys_train_idxs, self.sys_val_idxs, self.sys_test_idxs
+        
+        elif mode == 'temporal':
+            pass # TODO
+
 
 def plot_gel_conds(x_syn_ratio, label=None):
     '''
