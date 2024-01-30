@@ -438,7 +438,7 @@ class ZeoSynGenDataset:
         return self.all_present_idx
 
 
-    def train_val_test_split(self, mode='random', both_graph_feat_present=True, random_state=0):
+    def train_val_test_split(self, mode='random', both_graph_feat_present=True, random_state=0, year_cutoff=None):
         '''Get datapoint idxs for train/val/test sets
         
         Returns:
@@ -458,6 +458,7 @@ class ZeoSynGenDataset:
             self.random_train_idxs, self.random_test_idxs = train_test_split(idxs, test_size=0.2, random_state=random_state)
             self.random_train_idxs, self.random_val_idxs = train_test_split(self.random_train_idxs, test_size=0.125, random_state=random_state)
             
+            print('n_datapoints:')
             print('train:', len(self.random_train_idxs), 'val:', len(self.random_val_idxs), 'test:', len(self.random_test_idxs))
         
             return self.random_train_idxs, self.random_val_idxs, self.random_test_idxs
@@ -502,7 +503,26 @@ class ZeoSynGenDataset:
             return self.sys_train_idxs, self.sys_val_idxs, self.sys_test_idxs
         
         elif mode == 'temporal':
-            pass # TODO
+            assert year_cutoff is not None, 'Must specify cutoff year.'
+
+            all_datapoints = self.get_datapoints_by_index([x for x in range(len(self))], scaled=False, return_dataframe=True)
+
+            # Create DataFrame with all datapoints
+            df = all_datapoints[1]
+            df['zeo'] = all_datapoints[3]
+            df['osda'] = all_datapoints[13]
+            df['year'] = all_datapoints[23]
+
+            df = df.loc[idxs] # Filter out datapoints with no graph/feature present for either zeolite and OSDA
+
+            self.year_train_idxs = df[df['year'] <= year_cutoff].index
+            self.year_train_idxs, self.year_val_idxs = train_test_split(self.year_train_idxs, test_size=0.125, random_state=random_state)
+            self.year_test_idxs = df[df['year'] > year_cutoff].index
+
+            print('n_datapoints:')
+            print('train:', len(self.year_train_idxs), 'val:', len(self.year_val_idxs), 'test:', len(self.year_test_idxs))
+
+            return self.year_train_idxs, self.year_val_idxs, self.year_test_idxs            
 
 
 def plot_gel_conds(x_syn_ratio, label=None):
