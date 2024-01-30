@@ -273,6 +273,8 @@ class ZeoSynGenDataset:
                  # Metadata
                  year,
                  doi,
+                 idxs,
+                 is_lit,
 
                  # Scalers
                  qts, # Dict eg. {'Si/Al': QuantileTransformer()}
@@ -295,6 +297,8 @@ class ZeoSynGenDataset:
 
         self.year = year
         self.doi = doi
+        self.idxs = idxs
+        self.is_lit = is_lit
 
         self.qts = qts # Dict of quantile transformers for synthesis conditions eg. {'Si/Al': QuantileTransformer()}
         self.osda_feat_scaler = osda_feat_scaler
@@ -311,6 +315,9 @@ class ZeoSynGenDataset:
                self.y_osda2_smiles[idx], self.y_osda2_graph[idx], self.y_osda2_feat[idx], self.y_osda2_graph_present[idx], self.y_osda2_feat_present[idx], \
                self.year[idx], \
                self.doi[idx], \
+               self.idxs[idx], \
+               self.is_lit[idx], \
+               
                
             #    self.y_zeo3_code[idx], self.y_zeo3_graph[idx], self.y_zeo3_feat[idx], self.y_zeo3_graph_present[idx], self.y_zeo3_feat_present[idx], \
             #    self.y_osda3_smiles[idx], self.y_osda3_graph[idx], self.y_osda3_feat[idx], self.y_osda3_graph_present[idx], self.y_osda3_feat_present[idx], \
@@ -413,7 +420,7 @@ class ZeoSynGenDataset:
         return self.get_datapoints_by_index(sys_idxs, scaled, return_dataframe)
 
 
-    def train_test_split():
+    def train_test_split(self):
         self.train_idxs = None
         self.val_idxs = None
         self.test_idxs = None
