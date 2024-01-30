@@ -10,6 +10,7 @@ import pdb
 from sklearn.preprocessing import QuantileTransformer, StandardScaler
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
+from sklearn.model_selection import train_test_split
 import pickle
 
 def check_nans(df):
@@ -418,15 +419,48 @@ class ZeoSynGenDataset:
                     sys_idxs.append(datapoint_idx)
 
         return self.get_datapoints_by_index(sys_idxs, scaled, return_dataframe)
+    
+    def get_idxs_with_zeo_osda_graphs_feats_present(self):
+        '''Get datapoint idxs with both graphs and features present for both zeolites and OSDAs
+        
+        Returns:
+            all_present_idx: List of indices
+        '''
+    
+        all_present_idx = []
+        # g: graph, f: feature, p: present
+        for idx, zeo_g_p, zeo_f_p, osda_g_p, osda_f_p in zip(self.idxs, self.y_zeo1_graph_present, self.y_zeo1_feat_present, self.y_osda1_graph_present, self.y_osda1_feat_present):
+            if np.all(np.array([zeo_g_p, zeo_f_p, osda_g_p, osda_f_p])): # if all graphs and features present for zeolites and OSDAs
+                all_present_idx.append(idx)
+
+        self.all_present_idx = all_present_idx
+
+        return self.all_present_idx
 
 
-    def train_test_split(self):
-        self.train_idxs = None
-        self.val_idxs = None
-        self.test_idxs = None
-        self.train_dataset = None
-        self.val_dataset = None
-        self.test_dataset = None
+    def train_val_test_split(self, mode='random', both_graph_feat_present=True, random_state=0):
+        '''Get datapoint idxs for train/val/test sets
+        
+        Returns:
+            random_train_idxs: List of indices
+            random_val_idxs: List of indices
+            random_test_idxs: List of indices
+        '''
+
+        assert mode in ['random', 'system', 'temporal'], 'Mode must be either random, system or temporal.'
+
+        if both_graph_feat_present: # Only use datapoints with both graphs and features present for both zeolites and OSDAs
+            idxs = self.get_idxs_with_zeo_osda_graphs_feats_present()
+        else: # If not, use all datapoints
+            idxs = self.idxs
+
+        if mode == 'random': # Random split
+            self.random_train_idxs, self.random_test_idxs = train_test_split(idxs, test_size=0.2, random_state=random_state)
+            self.random_train_idxs, self.random_val_idxs = train_test_split(self.random_train_idxs, test_size=0.125, random_state=random_state)
+            
+            print('train:', len(self.random_train_idxs), 'val:', len(self.random_val_idxs), 'test:', len(self.random_test_idxs))
+        
+            return self.random_train_idxs, self.random_val_idxs, self.random_test_idxs
 
 def plot_gel_conds(x_syn_ratio, label=None):
     '''
