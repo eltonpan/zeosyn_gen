@@ -2,15 +2,15 @@ import torch
 import torch.nn as nn
 
 class CVAE(nn.Module):
-    def __init__(self, z_dims = 64, input_size = 12, zeo_dims = 143, osda_dims = 19, comp_dims = 10):
+    def __init__(self, z_dims=64, syn_dims=12, zeo_feat_dims=143, osda_feat_dims=14):
         super().__init__()
-        self.z_dims     = z_dims
-        self.input_size = input_size
-        self.zeo_dims   = zeo_dims
-        self.osda_dims  = osda_dims
-        self.comp_dims  = comp_dims
+        self.z_dims   = z_dims
+        self.syn_dims = syn_dims
+        self.zeo_feat_dims  = zeo_feat_dims
+        self.osda_feat_dims = osda_feat_dims
 
-        self.encoder = nn.Sequential(nn.Linear(self.input_size + zeo_dims + osda_dims + comp_dims, 4096),
+
+        self.encoder = nn.Sequential(nn.Linear(self.syn_dims + self.zeo_feat_dims + self.osda_feat_dims, 4096),
                                      nn.ReLU(),
                                      nn.Linear(4096, 2048),
                                      nn.ReLU(),
@@ -23,7 +23,7 @@ class CVAE(nn.Module):
         self.mu      = nn.Linear(512, self.z_dims)
         self.logvar  = nn.Linear(512, self.z_dims)
 
-        self.decoder = nn.Sequential(nn.Linear(self.z_dims + zeo_dims + osda_dims + comp_dims, 512),
+        self.decoder = nn.Sequential(nn.Linear(self.z_dims + self.zeo_feat_dims + self.osda_feat_dims, 512),
                                      nn.ReLU(),
                                      nn.Linear(512, 1024),
                                      nn.ReLU(),
@@ -31,13 +31,13 @@ class CVAE(nn.Module):
                                      nn.ReLU(),
                                      nn.Linear(2048, 4096),
                                      nn.ReLU(),
-                                     nn.Linear(4096, self.input_size),
+                                     nn.Linear(4096, self.syn_dims),
                                      nn.Sigmoid()
         )
 
-    def forward(self, x, zeo, osda, comp):
+    def forward(self, x, zeo, osda):
         # CVAE forward function
-        x = torch.cat([x, zeo, osda, comp], dim = -1)
+        x = torch.cat([x, zeo, osda], dim = -1)
         x = self.encoder(x)
         mu = self.mu(x)
         logvar = self.logvar(x)
@@ -50,8 +50,15 @@ class CVAE(nn.Module):
         z += mu # add mu to give N(mu, std)
         
         # condition by concantenation
-        z = torch.cat([z, zeo, osda, comp], dim = -1)
+        z = torch.cat([z, zeo, osda], dim = -1)
 
         x_prime = self.decoder(z) # reconstructed x
         
         return x_prime, mu, logvar
+    
+    def predict(self, zeo, osda):
+
+        # Sample from the prior distribution
+        z = torch.randn(zeo.shape[0], self.z_dims).to(zeo.device)
+        z = torch.cat([z, zeo, osda], dim = -1)
+        return self.decoder(z)
