@@ -610,15 +610,18 @@ def compare_gel_conds(x_syn_ratios, labels, colors=None, kde=False, common_norm=
         stat = 'count'
 
     fontsize = 15
-    fig = plt.figure(figsize=(6/3*len(x_syn_ratios[0].columns),3), dpi = 100)
+
+    col_names = [c for c in x_syn_ratios[0].columns if c not in  ['zeo', 'osda']]
+
+    fig = plt.figure(figsize=(6/3*len(col_names),3), dpi = 100)
     col_idx = 1
     if colors == None:
         colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink']
     else:
         assert len(colors) == len(x_syn_ratios), 'Number of colors must be equal to number of DataFrames.'
 
-    for col_name in x_syn_ratios[0].columns:
-        ax = fig.add_subplot(1, len(x_syn_ratios[0].columns), col_idx)
+    for col_name in col_names:
+        ax = fig.add_subplot(1, len(col_names), col_idx)
         col_max = max([x_syn_ratio[col_name].max() for x_syn_ratio in x_syn_ratios])
         col_min= min([x_syn_ratio[col_name].min() for x_syn_ratio in x_syn_ratios])
 
