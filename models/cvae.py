@@ -59,6 +59,6 @@ class CVAE(nn.Module):
     def predict(self, zeo, osda):
 
         # Sample from the prior distribution
-        z = torch.randn(zeo.shape[0], self.z_dims).to(zeo.device)
+        z = torch.randn(zeo.shape[0], self.z_dims).to(f'cuda:{zeo.get_device()}')
         z = torch.cat([z, zeo, osda], dim = -1)
         return self.decoder(z)
