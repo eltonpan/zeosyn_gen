@@ -593,7 +593,7 @@ def plot_gel_conds(x_syn_ratio, label=None):
     plt.legend()
     plt.show()
 
-def compare_gel_conds(x_syn_ratios, labels, kde=False, common_norm=False):
+def compare_gel_conds(x_syn_ratios, labels, colors=None, kde=False, common_norm=False, alpha=1.):
     '''
     Args:
         x_syn_ratios: (List of pd.DataFrames) with columns of synthesis conditions. Each DataFrame should be have shape [n_datapoints, n_gel_comp + n_reaction_cond]
@@ -612,7 +612,11 @@ def compare_gel_conds(x_syn_ratios, labels, kde=False, common_norm=False):
     fontsize = 15
     fig = plt.figure(figsize=(6/3*len(x_syn_ratios[0].columns),3), dpi = 100)
     col_idx = 1
-    colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink']
+    if colors == None:
+        colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink']
+    else:
+        assert len(colors) == len(x_syn_ratios), 'Number of colors must be equal to number of DataFrames.'
+
     for col_name in x_syn_ratios[0].columns:
         ax = fig.add_subplot(1, len(x_syn_ratios[0].columns), col_idx)
         col_max = max([x_syn_ratio[col_name].max() for x_syn_ratio in x_syn_ratios])
@@ -620,13 +624,13 @@ def compare_gel_conds(x_syn_ratios, labels, kde=False, common_norm=False):
 
         if kde:
             for x_syn_ratio, label, color in zip(x_syn_ratios, labels, colors):
-                sns.histplot(x_syn_ratio[col_name], label=label, kde=kde, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color = color, stat=stat)
+                sns.histplot(x_syn_ratio[col_name], label=label, kde=kde, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color = color, stat=stat, alpha=alpha)
         else:
             for x_syn_ratio, label, color in zip(x_syn_ratios, labels, colors):
-                sns.histplot(x_syn_ratio[col_name], label=label, bins=20, binrange=[col_min, col_max], color = color, stat=stat)
+                sns.histplot(x_syn_ratio[col_name], label=label, bins=20, binrange=[col_min, col_max], color = color, stat=stat, alpha=alpha)
         
         ax.yaxis.set_tick_params(labelleft=False)
-        plt.xlabel(col_name, fontsize=fontsize, labelpad=5)
+
         if col_idx > 1:
             plt.ylabel('')
         else:
@@ -651,6 +655,11 @@ def compare_gel_conds(x_syn_ratios, labels, kde=False, common_norm=False):
                         xticks_w_inf.append(x)
                 xticks_w_inf[0] = '' # ad-hoc: Reduce congestion in xticks
                 plt.xticks(xticks, labels=xticks_w_inf)
+
+        # Set x-axis limits       
+        col_range = col_max-col_min
+        plt.xlim(col_min-0.1*col_range, col_max+0.1*col_range)
+        plt.xlabel(col_name, fontsize=fontsize, labelpad=5)
 
         col_idx += 1
 
