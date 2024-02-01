@@ -16,13 +16,13 @@ from tqdm import tqdm
 from models.cvae import CVAE
 
 configs = {
-'fname': 'test',
-'device' : 'cuda:2',
-'beta' : 2.5e-5,
-'batch_size' : 2048,
-'n_epochs' : 5000,
-'lr' : 1e-4,
-}
+            'fname': 'test-1',
+            'device' : 'cuda:2',
+            'beta' : 2.5e-5,
+            'batch_size' : 2048,
+            'n_epochs' : 5000,
+            'lr' : 1e-4,
+            }
 
 
 def train_cvae(model, configs):
@@ -32,7 +32,7 @@ def train_cvae(model, configs):
     os.mkdir(f"runs/cvae/{configs['fname']}")
 
     # Save configs
-    with open(f"runs/cvae/configs.json", "w") as outfile:
+    with open(f"runs/cvae/{configs['fname']}/configs.json", "w") as outfile:
         json.dump(configs, outfile, indent = 4)
 
     model = model.to(configs['device'])
@@ -124,19 +124,19 @@ def train_cvae(model, configs):
                     best_model = model # update model
                     print()
                     print('Best model updated at Epoch {}'.format(epoch))
-                    torch.save(model.state_dict(), 'runs/cvae/best_model.pt')
+                    torch.save(model.state_dict(), f"runs/cvae/{configs['fname']}/best_model.pt")
                     print()
                     
         val_loss_list.append(val_loss / len(val_loader.dataset))
     
 
-    with open('runs/cvae/train_loss_list.pkl', 'wb') as file:
+    with open(f"runs/cvae/{configs['fname']}/train_loss_list.pkl", 'wb') as file:
         pickle.dump(train_loss_list, file)
-    with open('runs/cvae/recons_loss_list.pkl', 'wb') as file:
+    with open(f"runs/cvae/{configs['fname']}/recons_loss_list.pkl", 'wb') as file:
         pickle.dump(recons_loss_list, file)
-    with open('runs/cvae/kld_loss_list.pkl', 'wb') as file:
+    with open(f"runs/cvae/{configs['fname']}/kld_loss_list.pkl", 'wb') as file:
         pickle.dump(kld_loss_list, file)
-    with open('runs/cvae/val_loss_list.pkl', 'wb') as file:
+    with open(f"runs/cvae/{configs['fname']}/val_loss_list.pkl", 'wb') as file:
         pickle.dump(val_loss_list, file)
 
     # return best_model, train_loss_list, recons_loss_list, kld_loss_list, val_loss_list
