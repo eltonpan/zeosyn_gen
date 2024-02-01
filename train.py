@@ -16,7 +16,7 @@ from models.cvae import CVAEv1, CVAEv2
 configs = { 
             'model_type' : 'cvae',
             'split' : 'random',
-            'fname': 'v2',
+            'fname': 'v2-repeat',
             'device' : 'cuda:2',
             'beta' : 2.5e-5,
             'batch_size' : 2048,
@@ -39,7 +39,7 @@ def train_cvae(model, configs):
     with open(f'data/ZeoSynGen_dataset.pkl', 'rb') as f: # load dataset
         dataset = pickle.load(f)
 
-    train_dataset, val_dataset, test_dataset = dataset.train_val_test_split(mode='random', both_graph_feat_present=True, random_state=0) # Note, here we filter out points with no graph/feature present for either zeolite and OSDA
+    train_dataset, val_dataset, test_dataset = dataset.train_val_test_split(mode=configs['split'], both_graph_feat_present=True, random_state=0) # Note, here we filter out points with no graph/feature present for either zeolite and OSDA
 
     train_dataset = (train_dataset[1], train_dataset[5], train_dataset[15])
     val_dataset   = (val_dataset[1],   val_dataset[5],   val_dataset[15])
