@@ -3,20 +3,20 @@ import sys
 import pdb
 import pickle
 import json
-
 import torch
 import torch.nn.functional as F
-# from torch.utils.data import DataLoader
-from torch_geometric.loader import DataLoader
 import torch.optim as optim
 import data.utils as utils
 sys.modules['utils'] = utils # Way to get around relative imports in utils for ZeoSynGen_dataset # https://stackoverflow.com/questions/2121874/python-pickling-after-changing-a-modules-directory
-
+# from torch.utils.data import DataLoader
+from torch_geometric.loader import DataLoader
 from tqdm import tqdm
-from models.cvae import CVAE
+from models.cvae import CVAEv1, CVAEv2
 
-configs = {
-            'fname': 'test-1',
+configs = { 
+            'model_type' : 'cvae',
+            'split' : 'random',
+            'fname': 'v2',
             'device' : 'cuda:2',
             'beta' : 2.5e-5,
             'batch_size' : 2048,
@@ -24,15 +24,14 @@ configs = {
             'lr' : 1e-4,
             }
 
-
 def train_cvae(model, configs):
 
     # Create run folder
-    assert os.path.isdir(f"runs/cvae/{configs['fname']}") == False, 'Name already taken. Please choose another folder name.'
-    os.mkdir(f"runs/cvae/{configs['fname']}")
+    assert os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}") == False, 'Name already taken. Please choose another folder name.'
+    os.mkdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}")
 
     # Save configs
-    with open(f"runs/cvae/{configs['fname']}/configs.json", "w") as outfile:
+    with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/configs.json", "w") as outfile:
         json.dump(configs, outfile, indent = 4)
 
     model = model.to(configs['device'])
@@ -124,23 +123,23 @@ def train_cvae(model, configs):
                     best_model = model # update model
                     print()
                     print('Best model updated at Epoch {}'.format(epoch))
-                    torch.save(model.state_dict(), f"runs/cvae/{configs['fname']}/best_model.pt")
+                    torch.save(model.state_dict(), f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/best_model.pt")
                     print()
                     
         val_loss_list.append(val_loss / len(val_loader.dataset))
     
 
-    with open(f"runs/cvae/{configs['fname']}/train_loss_list.pkl", 'wb') as file:
+    with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/train_loss_list.pkl", 'wb') as file:
         pickle.dump(train_loss_list, file)
-    with open(f"runs/cvae/{configs['fname']}/recons_loss_list.pkl", 'wb') as file:
+    with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/recons_loss_list.pkl", 'wb') as file:
         pickle.dump(recons_loss_list, file)
-    with open(f"runs/cvae/{configs['fname']}/kld_loss_list.pkl", 'wb') as file:
+    with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/kld_loss_list.pkl", 'wb') as file:
         pickle.dump(kld_loss_list, file)
-    with open(f"runs/cvae/{configs['fname']}/val_loss_list.pkl", 'wb') as file:
+    with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/val_loss_list.pkl", 'wb') as file:
         pickle.dump(val_loss_list, file)
 
     # return best_model, train_loss_list, recons_loss_list, kld_loss_list, val_loss_list
 
 if __name__ == "__main__":
-    model = CVAE()
+    model = CVAEv2()
     train_cvae(model, configs)
