@@ -492,26 +492,30 @@ class ZeoSynGenDataset:
 
             self.systems = list(df[['zeo', 'osda']].value_counts().index)
             self.train_systems, self.test_systems = train_test_split(self.systems, test_size=0.2, random_state=random_state)
-            self.train_systems, self.val_systems = train_test_split(self.train_systems, test_size=0.125, random_state=random_state)
+            # self.train_systems, self.val_systems = train_test_split(self.train_systems, test_size=0.125, random_state=random_state)
 
-            print('SYSTEMS:')
-            print('train:', len(self.train_systems), 'val:', len(self.val_systems), 'test:', len(self.test_systems))
-            print()
 
-            self.sys_train_idxs, self.sys_val_idxs, self.sys_test_idxs = [], [], []
+            # print('SYSTEMS:')
+            # print('train:', len(self.train_systems), 'val:', len(self.val_systems), 'test:', len(self.test_systems))
+            # print()
+
+            # self.sys_train_idxs, self.sys_val_idxs, self.sys_test_idxs = [], [], []
+            self.sys_train_idxs, self.sys_test_idxs = [], []
 
             for system in self.train_systems:
                 zeo, osda = system
                 system_idxs = list(df[(df['zeo']==zeo) & (df['osda']==osda)].index)
                 self.sys_train_idxs += system_idxs
-            for system in self.val_systems:
-                zeo, osda = system
-                system_idxs = list(df[(df['zeo']==zeo) & (df['osda']==osda)].index)
-                self.sys_val_idxs += system_idxs
+            # for system in self.val_systems:
+            #     zeo, osda = system
+            #     system_idxs = list(df[(df['zeo']==zeo) & (df['osda']==osda)].index)
+            #     self.sys_val_idxs += system_idxs
             for system in self.test_systems:
                 zeo, osda = system
                 system_idxs = list(df[(df['zeo']==zeo) & (df['osda']==osda)].index)
                 self.sys_test_idxs += system_idxs
+
+            self.sys_train_idxs, self.sys_val_idxs = train_test_split(self.sys_train_idxs, test_size=0.125, random_state=random_state) # Random train-val split
 
             self.sys_train_dataset = self.get_datapoints_by_index(self.sys_train_idxs)
             self.sys_val_dataset = self.get_datapoints_by_index(self.sys_val_idxs)

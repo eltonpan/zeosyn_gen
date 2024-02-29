@@ -16,7 +16,7 @@ from models.cvae import CVAEv1, CVAEv2
 configs = { 
             'model_type' : 'cvae',
             'split' : 'system',
-            'fname': 'v6',
+            'fname': 'v7',
             'device' : 'cuda:2',
             'beta' : 2.5e-5,
             'batch_size' : 2048,
@@ -24,8 +24,8 @@ configs = {
             'lr' : 1e-4,
             'model_params':{
                         'z_dims': 2,
-                        'zeo_h_dims': 256, 
-                        'osda_h_dims': 2, 
+                        'zeo_h_dims': 64, 
+                        'osda_h_dims': 64, 
                         'syn_dims': 12, 
                         'zeo_feat_dims': 143, 
                         'osda_feat_dims': 14
