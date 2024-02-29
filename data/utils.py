@@ -590,20 +590,21 @@ def plot_gel_conds(x_syn_ratio, label=None):
     plt.legend()
     plt.show()
 
-def compare_gel_conds(x_syn_ratios, labels, colors=None, kde=False, common_norm=False, alpha=1., show_hist=True):
+def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, common_norm=False, alpha=1.):
     '''
     Args:
         x_syn_ratios: (List of pd.DataFrames) with columns of synthesis conditions. Each DataFrame should be have shape [n_datapoints, n_gel_comp + n_reaction_cond]
         labels: (List of str) legend labels for the above DataFrame(s). Must be same length as x_syn_ratios
-        kde (bool): whether to plot kde on top of histogram
+        plot_kde (List of bools): whether to plot kde of distribution
+        plot_bar (List of bools): whether to plot bars of histogram
         common_norm: Bool. for two plots to have the same normalized area.
-        show_hist: Switch off histogram bars. To be used in conjunction with kde=True.
         
     '''
     assert len(x_syn_ratios) == len(labels), 'Number of DataFrames must be equal to number of legend labels.'
 
     if common_norm:
-        stat = 'proportion'
+        # stat = 'proportion'
+        stat = 'density'
     else:
         stat = 'count'
 
@@ -623,17 +624,26 @@ def compare_gel_conds(x_syn_ratios, labels, colors=None, kde=False, common_norm=
         col_max = max([x_syn_ratio[col_name].max() for x_syn_ratio in x_syn_ratios])
         col_min= min([x_syn_ratio[col_name].min() for x_syn_ratio in x_syn_ratios])
 
-        if kde:
-            if show_hist: # enable bars
-                for x_syn_ratio, label, color in zip(x_syn_ratios, labels, colors):
-                    sns.histplot(x_syn_ratio[col_name], label=label, kde=kde, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
-            else: # disable bars
-                for x_syn_ratio, label, color in zip(x_syn_ratios, labels, colors):
-                    sns.kdeplot(x_syn_ratio[col_name], label=label, clip=[col_min, col_max], cut=100, color=color, alpha=alpha, linewidth=2, fill=True)
-
-        else:
-            for x_syn_ratio, label, color in zip(x_syn_ratios, labels, colors):
+        for x_syn_ratio, label, color, kde, bar in zip(x_syn_ratios, labels, colors, plot_kde, plot_bar):
+            assert kde or bar, f'At least one of kde or bar must be True for data labeled {label}'
+            if kde and bar: # plot both kde and bar
+                sns.histplot(x_syn_ratio[col_name], label=label, kde=True, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
+            elif kde: # plot only kde
+                sns.kdeplot(x_syn_ratio[col_name], label=label, clip=[col_min, col_max], cut=100, color=color, alpha=alpha, linewidth=2, fill=True)
+            elif bar: # plot only bar
                 sns.histplot(x_syn_ratio[col_name], label=label, bins=20, binrange=[col_min, col_max], color = color, stat=stat, alpha=alpha)
+
+        # if kde:
+        #     if show_hist: # enable bars
+        #         for x_syn_ratio, label, color in zip(x_syn_ratios, labels, colors):
+        #             sns.histplot(x_syn_ratio[col_name], label=label, kde=kde, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
+        #     else: # disable bars
+        #         for x_syn_ratio, label, color in zip(x_syn_ratios, labels, colors):
+        #             sns.kdeplot(x_syn_ratio[col_name], label=label, clip=[col_min, col_max], cut=100, color=color, alpha=alpha, linewidth=2, fill=True)
+
+        # else:
+        #     for x_syn_ratio, label, color in zip(x_syn_ratios, labels, colors):
+        #         sns.histplot(x_syn_ratio[col_name], label=label, bins=20, binrange=[col_min, col_max], color = color, stat=stat, alpha=alpha)
         
         ax.yaxis.set_tick_params(labelleft=False)
 

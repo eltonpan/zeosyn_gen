@@ -18,7 +18,7 @@ configs = {
             'split' : 'system',
             'fname': 'v7',
             'device' : 'cuda:2',
-            'beta' : 2.5e-5,
+            'beta' : 1.0, # 2.5e-5,
             'batch_size' : 2048,
             'n_epochs' : 5000,
             'lr' : 1e-4,
