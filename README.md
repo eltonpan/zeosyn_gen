@@ -4,7 +4,7 @@
 `data/get_zeo_graphs.ipynb`: Get zeolite graphs resulting in `data/zeo2graph.pkl`
 `data/process_zeosyn.ipynb`: Preprocess `data/ZEOSYN-2.xlsx` to give `data/ZeoSynGen_dataset.pkl` (dataset object)
 `data/augmentation.ipynb`: Visualize and analyze `data/ZeoSynGen_dataset.pkl` for augmentation purposes
-`train.py`: Train CVAE model
+`train_cvae.py`: Train CVAE model
 `visualize_training.ipynb`: High-level visualizations of CVAE model
 
 
