@@ -681,3 +681,17 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
 
     plt.legend()
     plt.show()
+
+def visualize_smiles(smiles_list):
+    '''Visualize SMILES strings of molecules.
+    
+    Args:
+        smiles_list. List of SMILES strings.
+    '''
+
+    mol_list = [Chem.MolFromSmiles(s) for s in smiles_list]
+
+    plt.figure(dpi = 100)
+    plt.imshow(Chem.Draw.MolsToImage(mol_list))
+    plt.axis('off')
+    plt.show()
