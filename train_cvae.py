@@ -18,7 +18,7 @@ configs = {
             'split' : 'system',
             'fname': 'v15',
             'device' : 'cuda:3',
-            'beta' : 1e-7, # 2.5e-5,
+            'beta' : 1e-2, # optimal 1e-2,
             'batch_size' : 2048,
             'n_epochs' : 5000,
             'lr' : 1e-4,
