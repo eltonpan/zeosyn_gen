@@ -695,3 +695,20 @@ def visualize_smiles(smiles_list):
     plt.imshow(Chem.Draw.MolsToImage(mol_list))
     plt.axis('off')
     plt.show()
+
+def scale_x_syn_ratio(x_syn_ratio, dataset):
+    '''MinMax scales dataset to be between 0 and 1
+    
+    Args:
+    x_syn_ratio: pd.DataFrame of synthesis gel ratios and reaction conditons
+    dataset: ZeoSynGen_dataset object
+
+    Returns:
+    x_syn_ratio_scaled: pd.DataFrame of synthesis gel ratios and reaction conditons (scaled to 0-1)
+    '''
+    max_vals = pd.DataFrame(dataset.get_datapoints_by_index(range(len(dataset)), scaled=False, return_dataframe=True)[1]).max(0)
+    x_syn_ratio_scaled = x_syn_ratio.copy()
+    for col in dataset.ratio_names+dataset.cond_names:
+        x_syn_ratio_scaled[col] = x_syn_ratio[col]/max_vals[col]
+    
+    return x_syn_ratio_scaled
