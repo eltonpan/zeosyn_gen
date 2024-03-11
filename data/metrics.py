@@ -12,7 +12,7 @@ import pdb
 from geomloss import SamplesLoss
 if os.path.basename(os.getcwd()) == 'zeosyn_gen': # if running from the main directory
     os.chdir('data') # change directory into the data folder to allow imports below
-from syn_variables import zeo_cols
+from .syn_variables import zeo_cols
 
 def clean_cbus(cbu_str):
     # This fixes cbus column contains a str representation of list, instead of list itself #

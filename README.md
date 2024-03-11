@@ -5,7 +5,8 @@
 `data/process_zeosyn.ipynb`: Preprocess `data/ZEOSYN-2.xlsx` to give `data/ZeoSynGen_dataset.pkl` (dataset object)
 `data/augmentation.ipynb`: Visualize and analyze `data/ZeoSynGen_dataset.pkl` for augmentation purposes
 `train_cvae.py`: Train CVAE model
-`visualize_training.ipynb`: High-level visualizations of CVAE model
+`eval_cvae.py`: Evaluate CVAE model
+`visualize_pred.ipynb`: Visualizations of CVAE predictions
 
 
 **Data**
