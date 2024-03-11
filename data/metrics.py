@@ -9,6 +9,7 @@ import torch
 from sklearn.preprocessing import StandardScaler
 from ast import literal_eval
 import pdb
+from geomloss import SamplesLoss
 if os.path.basename(os.getcwd()) == 'zeosyn_gen': # if running from the main directory
     os.chdir('data') # change directory into the data folder to allow imports below
 from syn_variables import zeo_cols
@@ -266,6 +267,41 @@ def maximum_mean_discrepancy(x, y, kernel='rbf'):
     XX.fill_diagonal_(0.) # remove 1.0s from diagonals (no self-distance)
     YY.fill_diagonal_(0.) # remove 1.0s from diagonals (no self-distance)
     return (torch.sum(XX)/(XX.shape[0]**2 - len(XX.diagonal())) + torch.sum(YY)/(YY.shape[0]**2 - len(YY.diagonal())) - 2. * torch.mean(XY)).item()
+
+ws_distance = SamplesLoss("sinkhorn", blur=0.05,)
+def wasserstein_distance(x, y):
+    """Emprical maximum mean discrepancy. The lower the result, the more evidence that distributions are the same.
+
+    Adapted from https://www.onurtunali.com/ml/2019/03/08/maximum-mean-discrepancy-in-machine-learning.html
+    For more background: https://stats.stackexchange.com/questions/276497/maximum-mean-discrepancy-distance-distribution
+
+    Args:
+        x: first sample, distribution P
+        y: second sample, distribution Q
+        kernel: kernel type such as "multiscale" or "rbf"
+    """
+
+    if isinstance(x, pd.DataFrame):
+        x = torch.from_numpy(x.to_numpy())
+    if isinstance(y, pd.DataFrame):
+        y = torch.from_numpy(y.to_numpy())
+
+    if isinstance(x, np.ndarray): 
+        x = torch.from_numpy(x)
+    if isinstance(y, np.ndarray): 
+        y = torch.from_numpy(y)
+
+    assert x.ndim == 2 and y.ndim == 2, 'matrices needs to be 2D'
+    assert x.shape[1] == y.shape[1], 'number of features need to be the same'
+
+    if x.shape[0] == 1: # if distribution only has 1 datapoint - duplicate it to allow metric to work
+        x = torch.cat([x, x], axis=0)
+    if y.shape[0] == 1: # if distribution only has 1 datapoint - duplicate it to allow metric to work
+        y = torch.cat([y, y], axis=0)
+
+    x, y = x.double().contiguous(), y.double().contiguous()
+    
+    return ws_distance(x, y).item()
 
 if os.path.basename(os.getcwd()) == 'data': 
     os.chdir('..') # switch back to main directory after all
