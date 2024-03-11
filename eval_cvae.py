@@ -82,7 +82,7 @@ def get_prediction_and_ground_truths(model, configs):
 
     return syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset
 
-def eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs, eval=True, plot=False, print_metrics=False, num_systems=10):
+def eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs, eval=True, plot=False, print_metrics=False, num_systems=None):
     '''
     Calculate and save evaluation metrics for zeolite-aggregated systems
 
@@ -153,7 +153,7 @@ def eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled
     else:
         return None, None
 
-def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs, eval=True, plot=False, print_metrics=False, num_systems=10):
+def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs, eval=True, plot=False, print_metrics=False, num_systems=None):
     '''
     Calculate and save evaluation metrics for zeolite-OSDA systems
 
@@ -220,3 +220,13 @@ def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, data
 
     else:
         return None, None
+    
+if __name__ == '__main__':
+    model_type = 'cvae'
+    fname = 'v10'
+    split = 'system'
+
+    model, configs = load_model(model_type, fname, split)
+    syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs)
+    mmd_zeo_agg_df, wsd_zeo_agg_df = eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
+    mmd_zeo_osda_df, wsd_zeo_osda_df = eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
