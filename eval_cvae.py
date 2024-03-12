@@ -87,6 +87,7 @@ def eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled
     Calculate and save evaluation metrics for zeolite-aggregated systems
 
     Args:
+    eval: bool, whether to calculate metrics
     plot: bool, whether to plot prediction vs. true
     print_metrics: bool, whether to print metrics
     num_systems: int, number of systems (in descending frequency in test dataset)
@@ -133,31 +134,36 @@ def eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled
     
     if eval:
         # Save MMD
-        mmd_zeo_agg_df = pd.DataFrame({'zeo': mmd_zeo_agg.keys(), 'MMD': mmd_zeo_agg.values()}).sort_values('MMD')
+        mmd_zeo_agg_df = pd.DataFrame({'zeo': mmd_zeo_agg.keys(), 'MMD': mmd_zeo_agg.values()})
         assert mmd_zeo_agg_df['MMD'].isna().sum() == 0 # Check no NaNs
         mmd_mean, mmd_std = mmd_zeo_agg_df['MMD'].mean(), mmd_zeo_agg_df['MMD'].std()
-        with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/mmd_zeo_agg.json", "w") as outfile:
-            json.dump({'MMD mean': mmd_mean, 'MMD std': mmd_std}, outfile, indent=4)
         print('Mean MMD:', mmd_mean, 'Std MMD:', mmd_std)
+        if num_systems == None: # Save only if evaluated on all systems
+            mmd_zeo_agg_df.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/mmd_zeo_agg_df.csv", index=False) # Save per-system MMDs
+            with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/mmd_zeo_agg.json", "w") as outfile:
+                json.dump({'MMD mean': mmd_mean, 'MMD std': mmd_std}, outfile, indent=4)
 
         # Save WSD
-        wsd_zeo_agg_df = pd.DataFrame({'zeo': wsd_zeo_agg.keys(), 'WSD': wsd_zeo_agg.values()}).sort_values('WSD')
+        wsd_zeo_agg_df = pd.DataFrame({'zeo': wsd_zeo_agg.keys(), 'WSD': wsd_zeo_agg.values()})
         assert wsd_zeo_agg_df['WSD'].isna().sum() == 0 # Check no NaNs
         wsd_mean, wsd_std = wsd_zeo_agg_df['WSD'].mean(), wsd_zeo_agg_df['WSD'].std()
-        with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/wsd_zeo_agg.json", "w") as outfile:
-            json.dump({'WSD mean': wsd_mean, 'WSD std': wsd_std}, outfile, indent=4)
         print('Mean WSD:', wsd_mean, 'Std WSD:', wsd_std)
-
+        if num_systems == None: # Save only if evaluated on all systems
+            wsd_zeo_agg_df.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/wsd_zeo_agg_df.csv", index=False) # Save per-system WSDs
+            with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/wsd_zeo_agg.json", "w") as outfile:
+                json.dump({'WSD mean': wsd_mean, 'WSD std': wsd_std}, outfile, indent=4)
+        
         return mmd_zeo_agg_df, wsd_zeo_agg_df
     
     else:
-        return None, None
+        pass
 
 def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs, eval=True, plot=False, print_metrics=False, num_systems=None):
     '''
     Calculate and save evaluation metrics for zeolite-OSDA systems
 
     Args:
+    eval: bool, whether to calculate metrics
     plot: bool, whether to plot prediction vs. true
     print_metrics: bool, whether to print metrics
     num_systems: int, number of systems (in descending frequency in test dataset)
@@ -201,25 +207,87 @@ def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, data
             break
     if eval:
         # Save MMD
-        mmd_zeo_osda_df = pd.DataFrame({'zeo_osda': mmd_zeo_osda.keys(), 'MMD': mmd_zeo_osda.values()}).sort_values('MMD')
+        mmd_zeo_osda_df = pd.DataFrame({'zeo': [z for z, _ in [*mmd_zeo_osda]], 'osda': [o for _, o in [*mmd_zeo_osda]], 'MMD': mmd_zeo_osda.values()})
         assert mmd_zeo_osda_df['MMD'].isna().sum() == 0 # Check no NaNs
         mmd_mean, mmd_std = mmd_zeo_osda_df['MMD'].mean(), mmd_zeo_osda_df['MMD'].std()
-        with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/mmd_zeo_osda.json", "w") as outfile:
-            json.dump({'MMD mean': mmd_mean, 'MMD std': mmd_std}, outfile, indent=4)
         print('Mean MMD:', mmd_mean, 'Std MMD:', mmd_std)
+        if num_systems == None: # Save only if evaluated on all systems
+            mmd_zeo_osda_df.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/mmd_zeo_osda_df.csv", index=False) # Save per-system MMDs
+            with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/mmd_zeo_osda.json", "w") as outfile:
+                json.dump({'MMD mean': mmd_mean, 'MMD std': mmd_std}, outfile, indent=4)
 
         # Save WSD
-        wsd_zeo_osda_df = pd.DataFrame({'zeo_osda': wsd_zeo_osda.keys(), 'WSD': wsd_zeo_osda.values()}).sort_values('WSD')
+        wsd_zeo_osda_df = pd.DataFrame({'zeo': [z for z, _ in [*wsd_zeo_osda]], 'osda': [o for _, o in [*wsd_zeo_osda]], 'WSD': wsd_zeo_osda.values()})
         assert wsd_zeo_osda_df['WSD'].isna().sum() == 0 # Check no NaNs
         wsd_mean, wsd_std = wsd_zeo_osda_df['WSD'].mean(), wsd_zeo_osda_df['WSD'].std()
-        with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/wsd_zeo_osda.json", "w") as outfile:
-            json.dump({'WSD mean': wsd_mean, 'WSD std': wsd_std}, outfile, indent=4)
         print('Mean WSD:', wsd_mean, 'Std WSD:', wsd_std)
+        if num_systems == None: # Save only if evaluated on all systems
+            wsd_zeo_osda_df.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/wsd_zeo_osda_df.csv", index=False) # Save per-system WSDs
+            with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/wsd_zeo_osda.json", "w") as outfile:
+                json.dump({'WSD mean': wsd_mean, 'WSD std': wsd_std}, outfile, indent=4)
 
         return mmd_zeo_osda_df, wsd_zeo_osda_df
 
     else:
-        return None, None
+        pass
+    
+def eval_single_system(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, mmd_zeo_agg_df, wsd_zeo_agg_df, mmd_zeo_osda_df, wsd_zeo_osda_df, zeo, osda=None, plot=True, print_metrics=True):
+    '''
+    Calculate evaluation metrics for a SPECIFIC zeolite or zeolite-OSDA system
+
+    Args:
+    eval: bool, whether to calculate metrics
+    plot: bool, whether to plot prediction vs. true
+    print_metrics: bool, whether to print metrics
+    '''
+
+    if osda == None: # Zeolite-aggregated
+        if plot:
+            print(zeo)
+
+        sys_syn_pred, sys_syn_true = syn_pred[syn_pred['zeo'] == zeo], syn_true[syn_true['zeo'] == zeo]
+        sys_syn_pred_scaled, sys_syn_true_scaled = syn_pred_scaled[syn_pred_scaled['zeo'] == zeo], syn_true_scaled[syn_true_scaled['zeo'] == zeo]
+
+        if print_metrics:
+            mmd = mmd_zeo_agg_df[mmd_zeo_agg_df['zeo']==zeo]['MMD'].item()
+            wsd = wsd_zeo_agg_df[wsd_zeo_agg_df['zeo']==zeo]['WSD'].item()
+            print('MMD:', mmd)
+            print('WSD:', wsd)
+
+    else: # Zeolite-OSDA
+        if plot:
+            print(zeo, osda)
+
+        sys_syn_pred, sys_syn_true = syn_pred[(syn_pred['zeo'] == zeo) & (syn_pred['osda'] == osda)], syn_true[(syn_true['zeo'] == zeo) & (syn_true['osda'] == osda)]
+        sys_syn_pred_scaled, sys_syn_true_scaled = syn_pred_scaled[(syn_pred_scaled['zeo'] == zeo) & (syn_pred_scaled['osda'] == osda)], syn_true_scaled[(syn_true_scaled['zeo'] == zeo) & (syn_true_scaled['osda'] == osda)]
+        
+        if print_metrics:
+            mmd = mmd_zeo_osda_df[(mmd_zeo_osda_df['zeo']==zeo) & (mmd_zeo_osda_df['osda']==osda)]['MMD'].item()
+            wsd = wsd_zeo_osda_df[wsd_zeo_osda_df['zeo']==zeo & (wsd_zeo_osda_df['osda']==osda)]['WSD'].item()
+            print('MMD:', mmd)
+            print('WSD:', wsd)
+
+    if plot:
+        utils.compare_gel_conds([sys_syn_pred, sys_syn_true], ['Predicted', 'True'], [True, False], [False, True], ['tab:orange', 'tab:blue'], common_norm=True, alpha=0.5)
+
+def get_metric_dataframes(configs):
+    '''
+    Get dataframes of calculated metrics
+    '''
+
+    assert os.path.isfile(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/mmd_zeo_agg_df.csv"), 'Full evaluation dataframe (mmd_zeo_agg_df.csv) must exist, else run eval_cvae.py to get it'
+    mmd_zeo_agg_df = pd.read_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/mmd_zeo_agg_df.csv")
+
+    assert os.path.isfile(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/wsd_zeo_agg_df.csv"), 'Full evaluation dataframe (wsd_zeo_agg_df.csv) must exist, else run eval_cvae.py to get it'
+    wsd_zeo_agg_df = pd.read_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/wsd_zeo_agg_df.csv")
+
+    assert os.path.isfile(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/mmd_zeo_osda_df.csv"), 'Full evaluation dataframe (mmd_zeo_osda_df.csv) must exist, else run eval_cvae.py to get it'
+    mmd_zeo_osda_df = pd.read_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/mmd_zeo_osda_df.csv")
+
+    assert os.path.isfile(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/wsd_zeo_osda_df.csv"), 'Full evaluation dataframe (wsd_zeo_osda_df.csv) must exist, else run eval_cvae.py to get it'
+    wsd_zeo_osda_df = pd.read_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/wsd_zeo_osda_df.csv")
+
+    return mmd_zeo_agg_df, wsd_zeo_agg_df, mmd_zeo_osda_df, wsd_zeo_osda_df
     
 if __name__ == '__main__':
     model_type = 'cvae'
