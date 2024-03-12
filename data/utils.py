@@ -621,14 +621,50 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
 
     for col_name in col_names:
         ax = fig.add_subplot(1, len(col_names), col_idx)
+
+        # Define x-axis limits
         col_max = max([x_syn_ratio[col_name].max() for x_syn_ratio in x_syn_ratios])
-        col_min= min([x_syn_ratio[col_name].min() for x_syn_ratio in x_syn_ratios])
+        col_min = min([x_syn_ratio[col_name].min() for x_syn_ratio in x_syn_ratios])
+
+        if col_max-col_min == 0.: # If col_max == col_min, use user-defined right bound
+             user_defined_bounds = True  
+        else:
+             user_defined_bounds = False
+
+        if user_defined_bounds:
+            if col_name == 'Si/Al':
+                col_max = 400.00000000000006
+            elif col_name == 'Al/P':
+                col_max = 1.7179967159277212
+            elif col_name == 'Si/Ge':
+                col_max = 98.9999999999999
+            elif col_name == 'Si/B':
+                col_max = 250.00000000000003
+            elif col_name == 'Na/T':
+                col_max = 1.920999102706711
+            elif col_name == 'K/T':
+                col_max = 5.333333333333333
+            elif col_name == 'OH/T':
+                col_max = 2.4341677246909406
+            elif col_name == 'F/T':
+                col_max = 1.25
+            elif col_name == 'H2O/T':
+                col_max = 200.00000000000006
+            elif col_name == 'sda1/T':
+                col_max = 6.097582682238018
+            else:
+                assert False, f"the column name {col_name} does not have user-defined bounds in the case of col_range == 0.0 for plt.xlim()"
+        col_range = col_max-col_min
 
         for x_syn_ratio, label, color, kde, bar in zip(x_syn_ratios, labels, colors, plot_kde, plot_bar):
             assert kde or bar, f'At least one of kde or bar must be True for data labeled {label}'
             if kde and bar: # plot both kde and bar
                 sns.histplot(x_syn_ratio[col_name], label=label, kde=True, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
             elif kde: # plot only kde
+                if user_defined_bounds:
+                    print('original:', x_syn_ratio[col_name])
+                    print('noised:', x_syn_ratio[col_name]+np.random.randn(len(x_syn_ratio[col_name])))
+
                 sns.kdeplot(x_syn_ratio[col_name], label=label, clip=[col_min, col_max], cut=100, color=color, alpha=alpha, linewidth=2, fill=True)
             elif bar: # plot only bar
                 sns.histplot(x_syn_ratio[col_name], label=label, bins=20, binrange=[col_min, col_max], color = color, stat=stat, alpha=alpha)
@@ -673,7 +709,6 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
                 plt.xticks(xticks, labels=xticks_w_inf)
 
         # Set x-axis limits       
-        col_range = col_max-col_min
         plt.xlim(col_min-0.1*col_range, col_max+0.1*col_range)
         plt.xlabel(col_name, fontsize=fontsize, labelpad=5)
 
