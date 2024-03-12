@@ -263,7 +263,7 @@ def eval_single_system(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dat
         
         if print_metrics:
             mmd = mmd_zeo_osda_df[(mmd_zeo_osda_df['zeo']==zeo) & (mmd_zeo_osda_df['osda']==osda)]['MMD'].item()
-            wsd = wsd_zeo_osda_df[wsd_zeo_osda_df['zeo']==zeo & (wsd_zeo_osda_df['osda']==osda)]['WSD'].item()
+            wsd = wsd_zeo_osda_df[(wsd_zeo_osda_df['zeo']==zeo) & (wsd_zeo_osda_df['osda']==osda)]['WSD'].item()
             print('MMD:', mmd)
             print('WSD:', wsd)
 

@@ -626,12 +626,7 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
         col_max = max([x_syn_ratio[col_name].max() for x_syn_ratio in x_syn_ratios])
         col_min = min([x_syn_ratio[col_name].min() for x_syn_ratio in x_syn_ratios])
 
-        if col_max-col_min == 0.: # If col_max == col_min, use user-defined right bound
-             user_defined_bounds = True  
-        else:
-             user_defined_bounds = False
-
-        if user_defined_bounds:
+        if col_max-col_min == 0.: # If col_max == col_min, use user-defined right bound (KDE plot requires non-zero range)
             if col_name == 'Si/Al':
                 col_max = 400.00000000000006
             elif col_name == 'Al/P':
@@ -658,14 +653,21 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
 
         for x_syn_ratio, label, color, kde, bar in zip(x_syn_ratios, labels, colors, plot_kde, plot_bar):
             assert kde or bar, f'At least one of kde or bar must be True for data labeled {label}'
+            
             if kde and bar: # plot both kde and bar
-                sns.histplot(x_syn_ratio[col_name], label=label, kde=True, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
+                if x_syn_ratio.loc[:,col_name].var() == 0.0: # Zero variance, add noise to allow KDE plot to work
+                    noised_ratio = x_syn_ratio.loc[:,col_name]+np.abs(0.01*col_range*np.random.randn(len(x_syn_ratio.loc[:,col_name]))) # add small amount of noise (sigma = 0.01*col_range) to allow KDE plot to work
+                    sns.histplot(noised_ratio, label=label, kde=True, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
+                else:
+                    sns.histplot(x_syn_ratio[col_name], label=label, kde=True, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
+            
             elif kde: # plot only kde
-                if user_defined_bounds:
-                    print('original:', x_syn_ratio[col_name])
-                    print('noised:', x_syn_ratio[col_name]+np.random.randn(len(x_syn_ratio[col_name])))
-
-                sns.kdeplot(x_syn_ratio[col_name], label=label, clip=[col_min, col_max], cut=100, color=color, alpha=alpha, linewidth=2, fill=True)
+                if x_syn_ratio.loc[:,col_name].var() == 0.0: # Zero variance, add noise to allow KDE plot to work
+                    noised_ratio = x_syn_ratio.loc[:,col_name]+np.abs(0.01*col_range*np.random.randn(len(x_syn_ratio.loc[:,col_name]))) # add small amount of noise (sigma = 0.01*col_range) to allow KDE plot to work
+                    sns.kdeplot(noised_ratio, label=label, clip=[col_min, col_max], cut=100, color=color, alpha=alpha, linewidth=2, fill=True)
+                else:
+                    sns.kdeplot(x_syn_ratio[col_name], label=label, clip=[col_min, col_max], cut=100, color=color, alpha=alpha, linewidth=2, fill=True)
+            
             elif bar: # plot only bar
                 sns.histplot(x_syn_ratio[col_name], label=label, bins=20, binrange=[col_min, col_max], color = color, stat=stat, alpha=alpha)
 
@@ -710,7 +712,10 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
 
         # Set x-axis limits       
         plt.xlim(col_min-0.1*col_range, col_max+0.1*col_range)
-        plt.xlabel(col_name, fontsize=fontsize, labelpad=5)
+        # plt.xlabel(col_name, fontsize=fontsize, labelpad=5)
+        ax = plt.gca()
+        plt.xlabel(col_name, fontsize=fontsize)
+        ax.xaxis.set_label_coords(0.5, -0.25) # Set x-axis label position to constant level
 
         col_idx += 1
 
