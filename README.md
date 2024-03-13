@@ -1,6 +1,6 @@
 # Chemically-Guided Diffusion Denoising Enables Zeolite Synthesis Planning
 
-p align="center">
+<p align="center">
 <img src="/figs/denoising_diffusion.gif" width="200" />
 </p>
 
