@@ -1,4 +1,10 @@
-# zeosyn_gen
+# Chemically-Guided Diffusion Denoising Enables Zeolite Synthesis Planning
+
+p align="center">
+<img src="/figs/denoising_diffusion.gif" width="200" />
+</p>
+
+![](/figs/denoising_diffusion.png)
 
 **Pipeline**
 `data/get_zeo_graphs.ipynb`: Get zeolite graphs resulting in `data/zeo2graph.pkl`
