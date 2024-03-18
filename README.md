@@ -13,6 +13,7 @@
 `train_cvae.py`: Train CVAE model
 `eval_cvae.py`: Evaluate CVAE model
 `visualize_pred.ipynb`: Visualizations of CVAE predictions
+`notebooks/compare_cvae_v9_v10.ipynb`: Validation of MMD/WSD metrics by comparing CVAE predictions (from models v9 and v10) to grouth truth
 
 
 **Data**
