@@ -12,7 +12,7 @@
 `data/augmentation.ipynb`: Visualize and analyze `data/ZeoSynGen_dataset.pkl` for augmentation purposes
 `train_cvae.py`: Train CVAE model
 `eval_cvae.py`: Evaluate CVAE model
-`visualize_pred.ipynb`: Visualizations of CVAE predictions
+`notebooks/visualize_pred.ipynb`: Visualizations of CVAE predictions
 `notebooks/compare_cvae_v9_v10.ipynb`: Qualitative validation of MMD/WSD metrics by comparing CVAE predictions (from models v9 and v10) to grouth truth
 
 
