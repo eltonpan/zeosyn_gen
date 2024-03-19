@@ -6,7 +6,7 @@
 
 ![](/figs/denoising_diffusion.png)
 
-**Pipeline**
+## Pipeline
 - `data/get_zeo_graphs.ipynb`: Get zeolite graphs resulting in `data/zeo2graph.pkl`
 - `data/process_zeosyn.ipynb`: Preprocess `data/ZEOSYN-2.xlsx` to give `data/ZeoSynGen_dataset.pkl` (dataset object)
 - `data/augmentation.ipynb`: Visualize and analyze `data/ZeoSynGen_dataset.pkl` for augmentation purposes
@@ -15,6 +15,7 @@
 - `notebooks/visualize_pred.ipynb`: Visualizations of CVAE predictions
 - `notebooks/compare_cvae_v9_v10.ipynb`: Qualitative validation of MMD/WSD metrics by comparing CVAE predictions (from models v9 and v10) to grouth truth
 
+## Assets
 
 **Data**
 - `data/ZEOSYN-2.xlsx`: Cleaned ZeoSyn dataset
