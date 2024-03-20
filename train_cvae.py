@@ -146,8 +146,6 @@ def train_cvae(model, configs):
     with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/val_loss_list.pkl", 'wb') as file:
         pickle.dump(val_loss_list, file)
 
-    # return best_model, train_loss_list, recons_loss_list, kld_loss_list, val_loss_list
-
 if __name__ == "__main__":
     model = CVAEv2(**configs['model_params'])
     train_cvae(model, configs)
