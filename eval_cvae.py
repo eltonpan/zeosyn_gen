@@ -10,7 +10,8 @@ import data.utils as utils
 sys.modules['utils'] = utils # Way to get around relative imports in utils for ZeoSynGen_dataset # https://stackoverflow.com/questions/2121874/python-pickling-after-changing-a-modules-directory
 from einops import repeat
 from models.cvae import CVAEv1, CVAEv2
-from data.metrics import maximum_mean_discrepancy, wasserstein_distance
+from data.metrics import maximum_mean_discrepancy, wasserstein_distance, abs_error
+from sklearn.metrics import r2_score
 import pdb
 
 def load_model(model_type, fname, split):
@@ -102,6 +103,7 @@ def eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled
     count = 0
     mmd_zeo_agg = {} # Dict of MMDs for each zeolite
     wsd_zeo_agg = {} # Dict of WSDs for each zeolite
+    ae_zeo_agg = {} # Dict of AEs for each zeolite
     for zeo in zeo_systems:
         if zeo != 'Dense/Amorphous':
             if plot:
@@ -111,6 +113,10 @@ def eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled
             sys_syn_pred_scaled, sys_syn_true_scaled = syn_pred_scaled[syn_pred_scaled['zeo'] == zeo], syn_true_scaled[syn_true_scaled['zeo'] == zeo]
             
             if eval:
+                # Regression metrics
+                ae = abs_error(sys_syn_pred[dataset.ratio_names+dataset.cond_names], sys_syn_true[dataset.ratio_names+dataset.cond_names]) # use non-scaled version
+                ae_zeo_agg[zeo] = ae
+
                 # MMD
                 mmd = maximum_mean_discrepancy(sys_syn_pred_scaled[dataset.ratio_names+dataset.cond_names], sys_syn_true_scaled[dataset.ratio_names+dataset.cond_names])
                 mmd_zeo_agg[zeo] = mmd
@@ -118,6 +124,7 @@ def eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled
                 # WSD
                 wsd = wasserstein_distance(sys_syn_pred_scaled[dataset.ratio_names+dataset.cond_names], sys_syn_true_scaled[dataset.ratio_names+dataset.cond_names])
                 wsd_zeo_agg[zeo] = wsd
+                
 
             if print_metrics:
                 print('MMD:', mmd)
@@ -133,11 +140,45 @@ def eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled
             break
     
     if eval:
+        # Save regression metrics
+        ae_zeo_agg_df = pd.DataFrame({'zeo': ae_zeo_agg.keys()})
+        regs = {}
+        maes, wmaes, r2s = {}, {}, {}
+        for col in dataset.ratio_names+dataset.cond_names:
+            ae_zeo_agg_df[col+'_ae'] = [x[col]['ae'] for x in ae_zeo_agg.values()]
+            ae_zeo_agg_df[col+'_pred_mean'] = [x[col]['pred_mean'] for x in ae_zeo_agg.values()]
+            ae_zeo_agg_df[col+'_true_mean'] = [x[col]['true_mean'] for x in ae_zeo_agg.values()]
+
+            # Mean absolute error (MAE)
+            mae = ae_zeo_agg_df[col+'_ae'].mean()
+
+            # Weighted mean absolute error (WMAE)
+            weights_unnormed = (1./ae_zeo_agg_df[col+'_true_mean']).replace([np.inf, np.nan], 0)
+            weights_normed = weights_unnormed/(weights_unnormed.sum())
+            wmae = (weights_normed * ae_zeo_agg_df[col+'_ae']).sum() # weighted mean absolute error (weighted by inverse of ground truth)
+            
+            # R2
+            ae_zeo_agg_df_ = ae_zeo_agg_df[[col+'_pred_mean', col+'_true_mean']].dropna()
+            r2 = r2_score(ae_zeo_agg_df_[col+'_pred_mean'], ae_zeo_agg_df_[col+'_true_mean'])
+
+            maes[col] = mae
+            wmaes[col] = wmae
+            r2s[col] = r2
+        
+        regs['maes'] = maes
+        regs['wmaes'] = wmaes
+        regs['r2s'] = r2s
+
+        if num_systems == None:
+            ae_zeo_agg_df.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/ae_zeo_agg_df.csv", index=False)
+            with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/reg_zeo_agg.json", "w") as outfile:
+                json.dump(regs, outfile, indent=4)
+
         # Save MMD
         mmd_zeo_agg_df = pd.DataFrame({'zeo': mmd_zeo_agg.keys(), 'MMD': mmd_zeo_agg.values()})
         assert mmd_zeo_agg_df['MMD'].isna().sum() == 0 # Check no NaNs
         mmd_mean, mmd_std = mmd_zeo_agg_df['MMD'].mean(), mmd_zeo_agg_df['MMD'].std()
-        print('Mean MMD:', mmd_mean, 'Std MMD:', mmd_std)
+        print('Mean MMD:', mmd_mean)
         if num_systems == None: # Save only if evaluated on all systems
             mmd_zeo_agg_df.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/mmd_zeo_agg_df.csv", index=False) # Save per-system MMDs
             with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/mmd_zeo_agg.json", "w") as outfile:
@@ -147,7 +188,7 @@ def eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled
         wsd_zeo_agg_df = pd.DataFrame({'zeo': wsd_zeo_agg.keys(), 'WSD': wsd_zeo_agg.values()})
         assert wsd_zeo_agg_df['WSD'].isna().sum() == 0 # Check no NaNs
         wsd_mean, wsd_std = wsd_zeo_agg_df['WSD'].mean(), wsd_zeo_agg_df['WSD'].std()
-        print('Mean WSD:', wsd_mean, 'Std WSD:', wsd_std)
+        print('Mean WSD:', wsd_mean)
         if num_systems == None: # Save only if evaluated on all systems
             wsd_zeo_agg_df.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/wsd_zeo_agg_df.csv", index=False) # Save per-system WSDs
             with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/wsd_zeo_agg.json", "w") as outfile:
@@ -178,6 +219,7 @@ def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, data
     count = 0
     mmd_zeo_osda = {} # Dict of MMDs for each zeolite-osda 
     wsd_zeo_osda = {} # Dict of WSDs for each zeolite-osda 
+    ae_zeo_osda = {} # Dict of AEs for each zeolite-osda
     for zeo, osda in zeo_osda_systems:
         if zeo != 'Dense/Amorphous':
             if plot:
@@ -186,6 +228,10 @@ def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, data
             sys_syn_pred_scaled, sys_syn_true_scaled = syn_pred_scaled[(syn_pred_scaled['zeo'] == zeo) & (syn_pred_scaled['osda'] == osda)], syn_true_scaled[(syn_true_scaled['zeo'] == zeo) & (syn_true_scaled['osda'] == osda)]
 
             if eval:
+                # Regression metrics
+                ae = abs_error(sys_syn_pred[dataset.ratio_names+dataset.cond_names], sys_syn_true[dataset.ratio_names+dataset.cond_names]) # use non-scaled version
+                ae_zeo_osda[(zeo,osda)] = ae
+
                 # MMD
                 mmd = maximum_mean_discrepancy(sys_syn_pred_scaled[dataset.ratio_names+dataset.cond_names], sys_syn_true_scaled[dataset.ratio_names+dataset.cond_names])
                 mmd_zeo_osda[(zeo,osda)] = mmd
@@ -206,11 +252,45 @@ def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, data
         if count == num_systems:
             break
     if eval:
+        # Save regression metrics
+        ae_zeo_osda_df = pd.DataFrame({'zeo': [z for z, _ in [*ae_zeo_osda]], 'osda': [o for _, o in [*ae_zeo_osda]]})
+        regs = {}
+        maes, wmaes, r2s = {}, {}, {}
+        for col in dataset.ratio_names+dataset.cond_names:
+            ae_zeo_osda_df[col+'_ae'] = [x[col]['ae'] for x in ae_zeo_osda.values()]
+            ae_zeo_osda_df[col+'_pred_mean'] = [x[col]['pred_mean'] for x in ae_zeo_osda.values()]
+            ae_zeo_osda_df[col+'_true_mean'] = [x[col]['true_mean'] for x in ae_zeo_osda.values()]
+
+            # Mean absolute error (MAE)
+            mae = ae_zeo_osda_df[col+'_ae'].mean()
+
+            # Weighted mean absolute error (WMAE)
+            weights_unnormed = (1./ae_zeo_osda_df[col+'_true_mean']).replace([np.inf, np.nan], 0)
+            weights_normed = weights_unnormed/(weights_unnormed.sum())
+            wmae = (weights_normed * ae_zeo_osda_df[col+'_ae']).sum() # weighted mean absolute error (weighted by inverse of ground truth)
+            
+            # R2
+            ae_zeo_osda_df_ = ae_zeo_osda_df[[col+'_pred_mean', col+'_true_mean']].dropna()
+            r2 = r2_score(ae_zeo_osda_df_[col+'_pred_mean'], ae_zeo_osda_df_[col+'_true_mean'])
+
+            maes[col] = mae
+            wmaes[col] = wmae
+            r2s[col] = r2
+        
+        regs['maes'] = maes
+        regs['wmaes'] = wmaes
+        regs['r2s'] = r2s
+
+        if num_systems == None:
+            ae_zeo_osda_df.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/ae_zeo_osda_df.csv", index=False)
+            with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/reg_zeo_osda.json", "w") as outfile:
+                json.dump(regs, outfile, indent=4)
+
         # Save MMD
         mmd_zeo_osda_df = pd.DataFrame({'zeo': [z for z, _ in [*mmd_zeo_osda]], 'osda': [o for _, o in [*mmd_zeo_osda]], 'MMD': mmd_zeo_osda.values()})
         assert mmd_zeo_osda_df['MMD'].isna().sum() == 0 # Check no NaNs
         mmd_mean, mmd_std = mmd_zeo_osda_df['MMD'].mean(), mmd_zeo_osda_df['MMD'].std()
-        print('Mean MMD:', mmd_mean, 'Std MMD:', mmd_std)
+        print('Mean MMD:', mmd_mean)
         if num_systems == None: # Save only if evaluated on all systems
             mmd_zeo_osda_df.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/mmd_zeo_osda_df.csv", index=False) # Save per-system MMDs
             with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/mmd_zeo_osda.json", "w") as outfile:
@@ -220,7 +300,7 @@ def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, data
         wsd_zeo_osda_df = pd.DataFrame({'zeo': [z for z, _ in [*wsd_zeo_osda]], 'osda': [o for _, o in [*wsd_zeo_osda]], 'WSD': wsd_zeo_osda.values()})
         assert wsd_zeo_osda_df['WSD'].isna().sum() == 0 # Check no NaNs
         wsd_mean, wsd_std = wsd_zeo_osda_df['WSD'].mean(), wsd_zeo_osda_df['WSD'].std()
-        print('Mean WSD:', wsd_mean, 'Std WSD:', wsd_std)
+        print('Mean WSD:', wsd_mean)
         if num_systems == None: # Save only if evaluated on all systems
             wsd_zeo_osda_df.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/wsd_zeo_osda_df.csv", index=False) # Save per-system WSDs
             with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/wsd_zeo_osda.json", "w") as outfile:

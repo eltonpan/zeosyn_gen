@@ -303,6 +303,35 @@ def wasserstein_distance(x, y):
     
     return ws_distance(x, y).item()
 
+def abs_error(x, y):
+
+    '''
+    Returns dictionary of absolute errors for each feature. eg. {'Si/Al': 5, 'Si/Ge': 10, ...}
+    '''
+    assert isinstance(x, pd.DataFrame) and isinstance(y, pd.DataFrame), 'inputs need to be pandas dataframes'
+
+    ae_dict = {}
+    for col in x.columns:
+        # Filter out infinite values for Si/Al, Al/P, Si/Ge, Si/B
+        if col == 'Si/Al':
+            pred, true = x[col][x[col] < 390.], y[col][y[col] < 390.]
+        elif col == 'Al/P':
+            pred, true = x[col][x[col] < 1.6], y[col][y[col] < 1.6]
+        elif col == 'Si/Ge':
+            pred, true = x[col][x[col] < 90.], y[col][y[col] < 90.]
+        elif col == 'Si/B':
+            pred, true = x[col][x[col] < 240.], y[col][y[col] < 240.]
+        elif col in ['Na/T', 'K/T', 'OH/T', 'F/T', 'H2O/T', 'sda1/T', 'cryst_temp', 'cryst_time']:
+            pred, true = x[col], y[col]
+
+        pred_mean = pred.mean()
+        true_mean = true.mean()
+        ae = np.abs(pred_mean - true_mean).item() # absolute error
+
+        ae_dict[col] = {'ae': ae, 'pred_mean': pred_mean, 'true_mean': true_mean}
+
+    return ae_dict
+
 if os.path.basename(os.getcwd()) == 'data': 
     os.chdir('..') # switch back to main directory after all
 
