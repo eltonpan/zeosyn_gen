@@ -11,6 +11,7 @@
 - `data/process_zeosyn.ipynb`: Preprocess `data/ZEOSYN-2.xlsx` to give `data/ZeoSynGen_dataset.pkl` (dataset object)
 - `data/augmentation.ipynb`: Visualize and analyze `data/ZeoSynGen_dataset.pkl` for augmentation purposes
 - `train_cvae.py`: Train CVAE model
+- `train_diff.py`: Train diffusion model
 - `eval_cvae.py`: Evaluate CVAE model
 - `notebooks/visualize_pred.ipynb`: Visualizations of CVAE predictions
 - `notebooks/compare_cvae_v9_v10.ipynb`: Qualitative validation of MMD/WSD metrics by comparing CVAE predictions (from models v9 and v10) to grouth truth
