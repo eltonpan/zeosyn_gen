@@ -10,6 +10,7 @@ import data.utils as utils
 sys.modules['utils'] = utils # Way to get around relative imports in utils for ZeoSynGen_dataset # https://stackoverflow.com/questions/2121874/python-pickling-after-changing-a-modules-directory
 from einops import repeat
 from models.cvae import CVAEv1, CVAEv2
+from models.diffusion import *
 from data.metrics import maximum_mean_discrepancy, wasserstein_distance, abs_error
 from sklearn.metrics import r2_score
 import pdb
@@ -24,18 +25,40 @@ def load_model(model_type, fname, split):
         configs = json.load(f)
 
     # 2) Load model and get predictions
-    # model = CVAEv1(**configs['model_params'])
-    model = CVAEv2(**configs['model_params'])
-    model.load_state_dict(torch.load(f'runs/{model_type}/{split}/{fname}/best_model.pt', map_location=configs['device']))
-    model = model.to(configs['device'])
-    model.eval()
+    if model_type == 'cvae':
+        # model = CVAEv1(**configs['model_params'])
+        model = CVAEv2(**configs['model_params'])
+        model.load_state_dict(torch.load(f'runs/{model_type}/{split}/{fname}/best_model.pt', map_location=configs['device']))
+        model = model.to(configs['device'])
+        model.eval()
+    
+    elif model_type == 'diff':
+        unet = Unet1D(
+                dim                 = configs['model_params']['dim'],
+                dim_mults           = configs['model_params']['dim_mults'],
+                channels            = configs['model_params']['channels'],
+                resnet_block_groups = configs['model_params']['resnet_block_groups'],
+                zeo_feat_dims       = configs['model_params']['zeo_feat_dims'],
+                osda_feat_dims      = configs['model_params']['osda_feat_dims'],
+                cond_drop_prob      = configs['model_params']['cond_drop_prob'],
+                )
+
+        model = GaussianDiffusion1D(
+                unet,
+                seq_length = configs['model_params']['seq_length'],
+                timesteps  = configs['model_params']['timesteps'],
+                objective  = 'pred_v',
+                ).to(configs['device'])
+
+        model.load_state_dict(torch.load(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/model.pt", map_location=configs['device']))
+        model.eval()
 
     return model, configs
 
 def get_prediction_and_ground_truths(model, configs):
-    # '''
-    # Get predicted distributions (and their scaled versions) and ground truth distributions for synthesis conditions
-    # '''
+    '''
+    Get predicted distributions (and their scaled versions) and ground truth distributions for synthesis conditions
+    '''
     print('Getting model predictions and grouth truths...')
     # Load test set
     with open(f'data/ZeoSynGen_dataset.pkl', 'rb') as f: # load dataset
@@ -49,12 +72,32 @@ def get_prediction_and_ground_truths(model, configs):
         print('Systems not predicted yet, predicting and saving...')
         
         # Predict synthesis conditions
-        zeo_code = repeat(np.array(zeo_code), 'n -> (repeat n)', repeat=50)
-        zeo = repeat(zeo, 'n d -> (repeat n) d', repeat=50)
-        osda_smiles = repeat(np.array(osda_smiles), 'n -> (repeat n)', repeat=50)
-        osda = repeat(osda, 'n d -> (repeat n) d', repeat=50)
-        zeo, osda = zeo.to(configs['device']), osda.to(configs['device'])
-        syn_pred = torch.tensor(model.predict(zeo, osda).cpu().detach().numpy())
+        if configs['model_type'] == 'cvae':
+            zeo_code = repeat(np.array(zeo_code), 'n -> (repeat n)', repeat=50)
+            zeo = repeat(zeo, 'n d -> (repeat n) d', repeat=50)
+            osda_smiles = repeat(np.array(osda_smiles), 'n -> (repeat n)', repeat=50)
+            osda = repeat(osda, 'n d -> (repeat n) d', repeat=50)
+            zeo, osda = zeo.to(configs['device']), osda.to(configs['device'])
+            syn_pred = torch.tensor(model.predict(zeo, osda).cpu().detach().numpy())
+        
+        elif configs['model_type'] == 'diff':
+            n_samples = 50
+            zeo_code, osda_smiles = repeat(np.array(zeo_code), 'n -> (repeat n)', repeat=n_samples), repeat(np.array(osda_smiles), 'n -> (repeat n)', repeat=n_samples)
+            zeo, osda = repeat(zeo, 'n d -> (repeat n) d', repeat=n_samples), repeat(osda, 'n d -> (repeat n) d', repeat=n_samples)
+            zeo, osda = zeo.to(configs['device']), osda.to(configs['device'])
+            chunks = []
+            chunk_end_fracs = [0.2, 0.4, 0.6, 0.8, 1.0] # chunk_end_frac: fraction of sample at which chunk ends
+            for chunk_end_frac in chunk_end_fracs: # Ensure all valid idxs
+                assert (chunk_end_frac*zeo.shape[0]).is_integer(), 'each chunk must have whole number of samples'
+            chunk_size = int(zeo.shape[0]/len(chunk_end_fracs)) # chunk_size: number of samples in each chunk
+            for chunk_end_frac in chunk_end_fracs:
+                chunk_end_idx = int(chunk_end_frac*zeo.shape[0]) # chunk_end_idx: index at which chunk ends
+                chunk_start_idx = int(chunk_end_idx - chunk_size) # chunk_start_idx: index at which chunk starts   
+                print(f'Predicting chunk from {chunk_start_idx} to {chunk_end_idx}...')
+                chunk_sampled_data = model.sample(batch_size=chunk_size, zeo=zeo[chunk_start_idx:chunk_end_idx], osda=osda[chunk_start_idx:chunk_end_idx], cond_scale=1)
+                chunk_syn_pred = torch.tensor(chunk_sampled_data.squeeze().detach().cpu().numpy())
+                chunks.append(chunk_syn_pred)
+            syn_pred = torch.cat(chunks, dim=0)
 
         # Scale synthesis conditions back
         for ratio_idx, ratio in enumerate(dataset.ratio_names+dataset.cond_names):
@@ -370,8 +413,8 @@ def get_metric_dataframes(configs):
     return mmd_zeo_agg_df, wsd_zeo_agg_df, mmd_zeo_osda_df, wsd_zeo_osda_df
     
 if __name__ == '__main__':
-    model_type = 'cvae'
-    fname = 'v10'
+    model_type = 'diff'
+    fname = 'v0'
     split = 'system'
 
     model, configs = load_model(model_type, fname, split)
