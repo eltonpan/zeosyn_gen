@@ -2,3 +2,5 @@ data/zeo_osda_sim-syn_cos_sim.csv
 data/zeo_osda_sim-syn_mmd_dissim.csv
 data/zeo_osda_sim-syn_cos_sim-zeo_egnn.csv
 nohup.out
+runs/diff/**/model.pt
+*.out
