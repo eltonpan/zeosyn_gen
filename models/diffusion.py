@@ -52,6 +52,7 @@ from functools import partial
 from denoising_diffusion_pytorch.version import __version__
 import copy
 import logging
+import pdb
 
 from torch.optim.lr_scheduler import ExponentialLR
 
@@ -311,7 +312,11 @@ class Unet1D(nn.Module):
     def __init__(
         self,
         dim,
-        cond_dim, # dim of input conditions
+        # cond_dim, # dim of input conditions
+        zeo_feat_dims = 143, 
+        osda_feat_dims = 14,
+        zeo_h_dims = 64, 
+        osda_h_dims = 64,
         cond_drop_prob = 0.5,
         init_dim = None,
         out_dim = None,
@@ -328,6 +333,10 @@ class Unet1D(nn.Module):
         # classifier free guidance stuff
 
         self.cond_drop_prob = cond_drop_prob
+        self.zeo_feat_dims = zeo_feat_dims 
+        self.osda_feat_dims = osda_feat_dims
+        self.zeo_h_dims = zeo_h_dims
+        self.osda_h_dims = osda_h_dims
 
         # determine dimensions
 
@@ -363,20 +372,40 @@ class Unet1D(nn.Module):
         )
 
         # condition
-        self.cond_enc = nn.Sequential( # encodes input cond
-            nn.Linear(cond_dim, dim),
-            nn.GELU(),
-            nn.Linear(dim, dim),
-        )
+        # self.cond_enc = nn.Sequential( # encodes input cond
+        #     nn.Linear(cond_dim, dim),
+        #     nn.GELU(),
+        #     nn.Linear(dim, dim),
+        # )
+
+        self.zeo_mlp = nn.Sequential(nn.Linear(self.zeo_feat_dims, 256),
+                                     nn.ReLU(),
+                                     nn.Linear(256, 128),
+                                     nn.ReLU(),
+                                     nn.Linear(128, self.zeo_h_dims),
+                                    )
+        self.osda_mlp = nn.Sequential(nn.Linear(self.osda_feat_dims, 256),
+                                     nn.ReLU(),
+                                     nn.Linear(256, 128),
+                                     nn.ReLU(),
+                                     nn.Linear(128, self.osda_h_dims),
+                                    )
+        
         # Random embedding assigned to null class for classifier-free guidance
-        self.null_cond_emb = nn.Parameter(torch.randn(dim)) # NOTE: dim used instead of cond_dim since cond_emb goes through encoder, but null_cond_emb doesn't
+        # self.null_cond_emb = nn.Parameter(torch.randn(dim)) # NOTE: dim used instead of cond_dim since cond_emb goes through encoder, but null_cond_emb doesn't
+        self.null_cond_emb = nn.Parameter(torch.randn(self.zeo_h_dims+self.osda_h_dims)) # NOTE: self.zeo_h_dims+self.osda_h_dims used instead of cond_dim since zeo and osda goes through respective encoders, but null_cond_emb doesn't
 
     
         cond_dim = dim * 4
 
+        # self.cond_mlp = nn.Sequential(
+        #     nn.Linear(dim, cond_dim),
+        #     nn.GELU(),
+        #     nn.Linear(cond_dim, cond_dim)
+        # )
         self.cond_mlp = nn.Sequential(
-            nn.Linear(dim, cond_dim),
-            nn.GELU(),
+            nn.Linear(zeo_h_dims+self.osda_h_dims, cond_dim),
+            nn.ReLU(),
             nn.Linear(cond_dim, cond_dim)
         )
 
@@ -435,7 +464,9 @@ class Unet1D(nn.Module):
         self,
         x,
         time,
-        cond,
+        # cond,
+        zeo,
+        osda,
         cond_drop_prob = None
     ):
         batch, device = x.shape[0], x.device
@@ -443,7 +474,10 @@ class Unet1D(nn.Module):
         cond_drop_prob = default(cond_drop_prob, self.cond_drop_prob)
 
         # derive condition, with condition dropout for classifier free guidance        
-        cond_emb = self.cond_enc(cond)
+        # cond_emb = self.cond_enc(cond)
+        zeo_emb = self.zeo_mlp(zeo)
+        osda_emb = self.osda_mlp(osda)
+        cond_emb = torch.cat([zeo_emb, osda_emb], dim = -1)  # Concatenate zeolite and osda embeddings
 
         if cond_drop_prob > 0:
             keep_mask = prob_mask_like((batch,), 1 - cond_drop_prob, device = device) # tensor of shape [batch_size] of booleans i.e. tensor([ True,  True,  True, False,  True, False, False,  True, False,  True])
@@ -648,8 +682,10 @@ class GaussianDiffusion1D(nn.Module):
         posterior_log_variance_clipped = extract(self.posterior_log_variance_clipped, t, x_t.shape)
         return posterior_mean, posterior_variance, posterior_log_variance_clipped
 
-    def model_predictions(self, x, t, cond, cond_scale = 3., clip_x_start = False):
-        model_output = self.model.forward_with_cond_scale(x, t, cond, cond_scale = cond_scale)
+    # def model_predictions(self, x, t, cond, cond_scale = 3., clip_x_start = False):
+    def model_predictions(self, x, t, zeo, osda, cond_scale = 3., clip_x_start = False):
+        # model_output = self.model.forward_with_cond_scale(x, t, cond, cond_scale = cond_scale)
+        model_output = self.model.forward_with_cond_scale(x, t, zeo, osda, cond_scale = cond_scale)
         maybe_clip = partial(torch.clamp, min = -1., max = 1.) if clip_x_start else identity
 
         if self.objective == 'pred_noise':
@@ -670,8 +706,10 @@ class GaussianDiffusion1D(nn.Module):
 
         return ModelPrediction(pred_noise, x_start)
 
-    def p_mean_variance(self, x, t, cond, cond_scale, clip_denoised = True):
-        preds = self.model_predictions(x, t, cond, cond_scale)
+    # def p_mean_variance(self, x, t, cond, cond_scale, clip_denoised = True):
+    def p_mean_variance(self, x, t, zeo, osda, cond_scale, clip_denoised = True):
+        # preds = self.model_predictions(x, t, cond, cond_scale)
+        preds = self.model_predictions(x, t, zeo, osda, cond_scale)
         x_start = preds.pred_x_start
 
         if clip_denoised:
@@ -681,16 +719,19 @@ class GaussianDiffusion1D(nn.Module):
         return model_mean, posterior_variance, posterior_log_variance, x_start
 
     @torch.no_grad()
-    def p_sample(self, x, t: int, cond, cond_scale = 3., clip_denoised = True):
+    # def p_sample(self, x, t: int, cond, cond_scale = 3., clip_denoised = True):
+    def p_sample(self, x, t: int, zeo, osda, cond_scale = 3., clip_denoised = True):
         b, *_, device = *x.shape, x.device
         batched_times = torch.full((b,), t, device = x.device, dtype = torch.long)
-        model_mean, _, model_log_variance, x_start = self.p_mean_variance(x = x, t = batched_times, cond = cond, cond_scale = cond_scale, clip_denoised = clip_denoised)
+        # model_mean, _, model_log_variance, x_start = self.p_mean_variance(x = x, t = batched_times, cond = cond, cond_scale = cond_scale, clip_denoised = clip_denoised)
+        model_mean, _, model_log_variance, x_start = self.p_mean_variance(x = x, t = batched_times, zeo = zeo, osda = osda, cond_scale = cond_scale, clip_denoised = clip_denoised)
         noise = torch.randn_like(x) if t > 0 else 0. # no noise if t == 0
         pred_img = model_mean + (0.5 * model_log_variance).exp() * noise
         return pred_img, x_start
 
     @torch.no_grad()
-    def p_sample_loop(self, cond, shape, cond_scale = 3.): 
+    # def p_sample_loop(self, cond, shape, cond_scale = 3.): 
+    def p_sample_loop(self, zeo, osda, shape, cond_scale = 3.): 
         batch, device = shape[0], self.betas.device
 
         img = torch.randn(shape, device=device)
@@ -698,13 +739,15 @@ class GaussianDiffusion1D(nn.Module):
         x_start = None
 
         for t in tqdm(reversed(range(0, self.num_timesteps)), desc = 'sampling loop time step', total = self.num_timesteps):
-            img, x_start = self.p_sample(img, t, cond, cond_scale)
+            # img, x_start = self.p_sample(img, t, cond, cond_scale)
+            img, x_start = self.p_sample(img, t, zeo, osda, cond_scale)
 
         img = unnormalize_to_zero_to_one(img)
         return img
 
     @torch.no_grad()
-    def ddim_sample(self, cond, shape, cond_scale = 3., clip_denoised = True):
+    # def ddim_sample(self, cond, shape, cond_scale = 3., clip_denoised = True):
+    def ddim_sample(self, zeo, osda, shape, cond_scale = 3., clip_denoised = True):
         batch, device, total_timesteps, sampling_timesteps, eta, objective = shape[0], self.betas.device, self.num_timesteps, self.sampling_timesteps, self.ddim_sampling_eta, self.objective
 
         times = torch.linspace(-1, total_timesteps - 1, steps=sampling_timesteps + 1)   # [-1, 0, 1, 2, ..., T-1] when sampling_timesteps == total_timesteps
@@ -717,7 +760,8 @@ class GaussianDiffusion1D(nn.Module):
 
         for time, time_next in tqdm(time_pairs, desc = 'sampling loop time step'):
             time_cond = torch.full((batch,), time, device=device, dtype=torch.long)
-            pred_noise, x_start, *_ = self.model_predictions(img, time_cond, cond, cond_scale = cond_scale, clip_x_start = clip_denoised)
+            # pred_noise, x_start, *_ = self.model_predictions(img, time_cond, cond, cond_scale = cond_scale, clip_x_start = clip_denoised)
+            pred_noise, x_start, *_ = self.model_predictions(img, time_cond, zeo, osda, cond_scale = cond_scale, clip_x_start = clip_denoised)
 
             if time_next < 0:
                 img = x_start
@@ -737,10 +781,12 @@ class GaussianDiffusion1D(nn.Module):
         return img
 
     @torch.no_grad()
-    def sample(self, cond, cond_scale = 3., batch_size = 16):
+    # def sample(self, cond, cond_scale = 3., batch_size = 16):
+    def sample(self, zeo, osda, cond_scale = 3., batch_size = 16):
         seq_length, channels = self.seq_length, self.channels
         sample_fn = self.p_sample_loop if not self.is_ddim_sampling else self.ddim_sample
-        return sample_fn(cond, (batch_size, channels, seq_length), cond_scale)
+        # return sample_fn(cond, (batch_size, channels, seq_length), cond_scale)
+        return sample_fn(zeo, osda, (batch_size, channels, seq_length), cond_scale)
 
     @torch.no_grad()
     def interpolate(self, x1, x2, t = None, lam = 0.5):
@@ -779,7 +825,8 @@ class GaussianDiffusion1D(nn.Module):
         else:
             raise ValueError(f'invalid loss type {self.loss_type}')
 
-    def p_losses(self, x_start, t, *, cond, noise = None): # class input level 1
+    # def p_losses(self, x_start, t, *, cond, noise = None): # class input level 1
+    def p_losses(self, x_start, t, *, zeo, osda, noise = None): # class input level 1
         b, c, n = x_start.shape
         noise = default(noise, lambda: torch.randn_like(x_start))
 
@@ -789,7 +836,8 @@ class GaussianDiffusion1D(nn.Module):
 
         # predict and take gradient step
 
-        model_out = self.model(x, t, cond) # class input level 2
+        # model_out = self.model(x, t, cond) # class input level 2
+        model_out = self.model(x, t, zeo, osda) # class input level 2
 
         if self.objective == 'pred_noise':
             target = noise
@@ -821,10 +869,16 @@ class Trainer1D(object):
     def __init__(
         self,
         diffusion_model: GaussianDiffusion1D,
-        dataset_train: Dataset,
-        cond_train: Dataset,
-        dataset_val: Dataset,
-        cond_val: Dataset,
+        # dataset_train: Dataset,
+        syn_train: Dataset,
+        # cond_train: Dataset,
+        zeo_train: Dataset,
+        osda_train: Dataset,
+        # dataset_val: Dataset,
+        syn_val: Dataset,
+        # cond_val: Dataset,
+        zeo_val: Dataset,
+        osda_val: Dataset,
         *,
         train_batch_size = 16,
         gradient_accumulate_every = 1,
@@ -841,6 +895,7 @@ class Trainer1D(object):
         split_batches = True,
         lr_decay = False,
         lr_decay_gamma = 0.9,
+        model_save_path = None,
     ):
         super().__init__()
 
@@ -870,10 +925,16 @@ class Trainer1D(object):
         self.train_num_steps = train_num_steps
 
         # dataset and dataloader
-        cond_train = cond_train.to('cpu').unsqueeze(dim = 1) # else will have CUDA asynchronous error
-        cond_val   = cond_val.to('cpu').unsqueeze(dim = 1) # else will have CUDA asynchronous error
-        dataset_combined_train = torch.cat([dataset_train, cond_train], dim = -1) # VERY ADHOC: Concatenate condition, then unconcatenate 
-        dataset_combined_val   = torch.cat([dataset_val, cond_val], dim = -1)
+        # cond_train = cond_train.to('cpu').unsqueeze(dim = 1) # else will have CUDA asynchronous error
+        # cond_val   = cond_val.to('cpu').unsqueeze(dim = 1) # else will have CUDA asynchronous error
+        syn_train, syn_val = syn_train.unsqueeze(dim = 1), syn_val.unsqueeze(dim = 1)
+        zeo_train, osda_train = zeo_train.to('cpu').unsqueeze(dim = 1), osda_train.to('cpu').unsqueeze(dim = 1) # else will have CUDA asynchronous error
+        zeo_val, osda_val = zeo_val.to('cpu').unsqueeze(dim = 1), osda_val.to('cpu').unsqueeze(dim = 1) # else will have CUDA asynchronous error
+        # dataset_combined_train = torch.cat([dataset_train, cond_train], dim = -1) # VERY ADHOC: Concatenate condition, then unconcatenate 
+        # dataset_combined_val   = torch.cat([dataset_val, cond_val], dim = -1)
+        dataset_combined_train = torch.cat([syn_train, zeo_train, osda_train], dim = -1) # VERY ADHOC: Concatenate condition, then unconcatenate 
+        dataset_combined_val   = torch.cat([syn_val, zeo_val, osda_val], dim = -1)
+        self.syn_dims, self.zeo_feat_dims, self.osda_feat_dims = syn_train.shape[-1], zeo_train.shape[-1], osda_train.shape[-1]
 
         dl_train = DataLoader(dataset_combined_train, batch_size = train_batch_size, shuffle = True, pin_memory = True, num_workers = cpu_count())
         dl_val   = DataLoader(dataset_combined_val, batch_size = train_batch_size, shuffle = False, pin_memory = True, num_workers = cpu_count())
@@ -889,6 +950,8 @@ class Trainer1D(object):
         self.lr_decay = lr_decay
         if lr_decay:
             self.scheduler = ExponentialLR(self.opt, gamma=lr_decay_gamma)
+        
+        self.model_save_path = model_save_path
 
         # for logging results in a folder periodically
 
@@ -966,11 +1029,14 @@ class Trainer1D(object):
 
                 for _ in range(self.gradient_accumulate_every):
                     data = next(self.dl_train).to(device)
-                    data, cond = data[:, :, :12], data[:, :, 12:] # split back to X and cond
-                    cond = cond.squeeze()
+                    # data, cond = data[:, :, :12], data[:, :, 12:] # split back to X and cond
+                    data, zeo, osda = data[:, :, :self.syn_dims], data[:, :, self.syn_dims:self.syn_dims+self.zeo_feat_dims], data[:, :, self.syn_dims+self.zeo_feat_dims:self.syn_dims+self.zeo_feat_dims+self.osda_feat_dims] # split back to X, zeo, osda
+                    # cond = cond.squeeze()
+                    zeo, osda = zeo.squeeze(), osda.squeeze()
 
                     with self.accelerator.autocast():
-                        loss = self.model(data, cond = cond)
+                        # loss = self.model(data, cond = cond)
+                        loss = self.model(data, zeo=zeo, osda=osda)
                         loss = loss / self.gradient_accumulate_every
                         total_train_loss += loss.item()
 
@@ -1005,11 +1071,14 @@ class Trainer1D(object):
                     with torch.no_grad():
                         for _ in range(self.gradient_accumulate_every):
                             data = next(self.dl_val).to(device)
-                            data, cond = data[:, :, :12], data[:, :, 12:] # split back to X and cond
-                            cond = cond.squeeze()
+                            # data, cond = data[:, :, :12], data[:, :, 12:] # split back to X and cond
+                            data, zeo, osda = data[:, :, :self.syn_dims], data[:, :, self.syn_dims:self.syn_dims+self.zeo_feat_dims], data[:, :, self.syn_dims+self.zeo_feat_dims:self.syn_dims+self.zeo_feat_dims+self.osda_feat_dims] # split back to X, zeo, osda
+                            # cond = cond.squeeze()
+                            zeo, osda = zeo.squeeze(), osda.squeeze()
 
                             with self.accelerator.autocast():
-                                loss = self.model(data, cond = cond)
+                                # loss = self.model(data, cond = cond)
+                                loss = self.model(data, zeo=zeo, osda=osda)
                                 loss = loss / self.gradient_accumulate_every
                                 total_val_loss += loss.item()
 
@@ -1019,10 +1088,11 @@ class Trainer1D(object):
                         # Save best model according to minima of loss to val set
                         if total_val_loss < best_val_loss: # if val loss has decreased
                             best_val_loss = total_val_loss # update best val loss
-                            best_model    = copy.deepcopy(self.model) # update best model
+                            # best_model    = copy.deepcopy(self.model) # update best model
+                            torch.save(self.model.state_dict(), f"{self.model_save_path}/model.pt")
                             print()
-                            print('Best model updated at Epoch {}'.format(self.step))
-                            module_logger.info('\n Best model updated at Epoch {} \n'.format(self.step))
+                            print('Best model saved at Epoch {}'.format(self.step))
+                            module_logger.info('\n Best model saved at Epoch {} \n'.format(self.step))
                             print()
                             
                     print()
@@ -1037,18 +1107,18 @@ class Trainer1D(object):
 
         return best_model, train_loss_list, val_loss_list
 
-def pad_data(data):
-    '''Pad data from 11 to 12 dimensions to allow for UNet architecture (by adding a placeholder column)
+# def pad_data(data):
+#     '''Pad data from 11 to 12 dimensions to allow for UNet architecture (by adding a placeholder column)
     
-    Args
-    data: np.array
-    '''
-    data = pd.DataFrame(data)
-    data.columns = X_syn_train.columns
-    data['placeholder'] = [0.]* len(data)
-    data = torch.tensor(np.array(data)).unsqueeze(1).float()
+#     Args
+#     data: np.array
+#     '''
+#     data = pd.DataFrame(data)
+#     data.columns = X_syn_train.columns
+#     data['placeholder'] = [0.]* len(data)
+#     data = torch.tensor(np.array(data)).unsqueeze(1).float()
     
-    return data
+#     return data
 
 class TabularDataset(Dataset):
     def __init__(self, X_syn, X_osda, target, comp):
