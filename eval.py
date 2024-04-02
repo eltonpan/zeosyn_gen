@@ -55,10 +55,14 @@ def load_model(model_type, fname, split):
 
     return model, configs
 
-def get_prediction_and_ground_truths(model, configs):
+def get_prediction_and_ground_truths(model, configs, cond_scale=None):
     '''
     Get predicted distributions (and their scaled versions) and ground truth distributions for synthesis conditions
+
+    Args:
+    cond_scale: float. Scale of conditioning for classifier-free guidance. Anything greater than 1 strengthens the classifier-free guidance. reportedly 3-8 is good empirically
     '''
+
     print('Getting model predictions and grouth truths...')
     # Load test set
     with open(f'data/ZeoSynGen_dataset.pkl', 'rb') as f: # load dataset
@@ -66,13 +70,20 @@ def get_prediction_and_ground_truths(model, configs):
     _, _, test_dataset = dataset.train_val_test_split(mode=configs['split'], both_graph_feat_present=True, random_state=0) # Note, here we filter out points with no graph/feature present for either zeolite and OSDA
 
     # Get test zeolites and OSDAs
-    zeo_code, zeo, osda_smiles, osda, = test_dataset[3], test_dataset[5], test_dataset[13], test_dataset[15], 
+    zeo_code, zeo, osda_smiles, osda, = test_dataset[3], test_dataset[5], test_dataset[13], test_dataset[15],
 
-    if not os.path.isfile(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/syn_pred_agg.csv"): # If synthetic predictions not already saved
+    if configs['model_type'] == 'cvae': # prediction csv filename
+        pred_fname = "syn_pred_agg.csv"
+    elif configs['model_type'] == 'diff':
+        assert cond_scale != None, 'cond_scale must be provided for diffusion model'
+        pred_fname = f"syn_pred_agg-cond_scale_{cond_scale}.csv"
+
+    if not os.path.isfile(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/{pred_fname}"): # If synthetic predictions not already saved
         print('Systems not predicted yet, predicting and saving...')
         
         # Predict synthesis conditions
         if configs['model_type'] == 'cvae':
+            assert cond_scale == None, 'cond_scale must not be provided for CVAE model'
             zeo_code = repeat(np.array(zeo_code), 'n -> (repeat n)', repeat=50)
             zeo = repeat(zeo, 'n d -> (repeat n) d', repeat=50)
             osda_smiles = repeat(np.array(osda_smiles), 'n -> (repeat n)', repeat=50)
@@ -81,6 +92,7 @@ def get_prediction_and_ground_truths(model, configs):
             syn_pred = torch.tensor(model.predict(zeo, osda).cpu().detach().numpy())
         
         elif configs['model_type'] == 'diff':
+            print(f"Predicting using diffusion model with cond_scale of {cond_scale}")
             n_samples = 50
             zeo_code, osda_smiles = repeat(np.array(zeo_code), 'n -> (repeat n)', repeat=n_samples), repeat(np.array(osda_smiles), 'n -> (repeat n)', repeat=n_samples)
             zeo, osda = repeat(zeo, 'n d -> (repeat n) d', repeat=n_samples), repeat(osda, 'n d -> (repeat n) d', repeat=n_samples)
@@ -94,7 +106,7 @@ def get_prediction_and_ground_truths(model, configs):
                 chunk_end_idx = int(chunk_end_frac*zeo.shape[0]) # chunk_end_idx: index at which chunk ends
                 chunk_start_idx = int(chunk_end_idx - chunk_size) # chunk_start_idx: index at which chunk starts   
                 print(f'Predicting chunk from {chunk_start_idx} to {chunk_end_idx}...')
-                chunk_sampled_data = model.sample(batch_size=chunk_size, zeo=zeo[chunk_start_idx:chunk_end_idx], osda=osda[chunk_start_idx:chunk_end_idx], cond_scale=1)
+                chunk_sampled_data = model.sample(batch_size=chunk_size, zeo=zeo[chunk_start_idx:chunk_end_idx], osda=osda[chunk_start_idx:chunk_end_idx], cond_scale=cond_scale)
                 chunk_syn_pred = torch.tensor(chunk_sampled_data.squeeze().detach().cpu().numpy())
                 chunks.append(chunk_syn_pred)
             syn_pred = torch.cat(chunks, dim=0)
@@ -105,11 +117,11 @@ def get_prediction_and_ground_truths(model, configs):
             syn_pred[:,ratio_idx] = torch.tensor(qt.inverse_transform(syn_pred[:,ratio_idx].reshape(-1, 1))).reshape(-1) # transform back
         syn_pred = pd.DataFrame(syn_pred, columns=dataset.ratio_names+dataset.cond_names)
         syn_pred['zeo'], syn_pred['osda'] = zeo_code, osda_smiles
-        syn_pred.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/syn_pred_agg.csv", index=False) # Save synthetic predictions
+        syn_pred.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/{pred_fname}", index=False)
         
     else:
         print('Loading synthetic predictions from saved predictions...')
-        syn_pred = pd.read_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/syn_pred_agg.csv")
+        syn_pred = pd.read_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/{pred_fname}")
 
     syn_pred_scaled = utils.scale_x_syn_ratio(syn_pred, dataset) # get min-max scaled version too
 
@@ -414,10 +426,25 @@ def get_metric_dataframes(configs):
     
 if __name__ == '__main__':
     model_type = 'diff'
-    fname = 'v0'
+    fname = 'v1'
     split = 'system'
 
-    model, configs = load_model(model_type, fname, split)
-    syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs)
-    mmd_zeo_agg_df, wsd_zeo_agg_df = eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
-    mmd_zeo_osda_df, wsd_zeo_osda_df = eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
+    # model, configs = load_model(model_type, fname, split)
+    # syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs)
+    # mmd_zeo_agg_df, wsd_zeo_agg_df = eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
+    # mmd_zeo_osda_df, wsd_zeo_osda_df = eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
+
+    # #### Vary cond_scale ####
+    # for cond_scale in [0.25, 0.5, 0.75, 1, 1.25, 1.5]:
+    #     model, configs = load_model(model_type, fname, split)
+    #     syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs, cond_scale=cond_scale)
+
+
+
+    # Run inference over multiple models, with varying cond_scales #
+    model_type = 'diff'
+    split = 'system'
+    for fname in ['v2', 'v3', 'v4', 'v5']:
+        for cond_scale in [0.75, 1, 1.25]:
+            model, configs = load_model(model_type, fname, split)
+            syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs, cond_scale=cond_scale)
