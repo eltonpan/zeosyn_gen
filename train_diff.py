@@ -10,11 +10,11 @@ import pdb
 configs = {
             "model_type" : "diff",
             "split" : "system",
-            "fname": "v5",
-            "device" : "cuda:2",
+            "fname": "v0-gae8",
+            "device" : "cuda:3",
             "train_batch_size": 32,
             "train_lr": 4e-4,
-            "train_num_steps": 1e6,
+            "train_num_steps": 1e5, # 1e6
             "gradient_accumulate_every": 2,
             "ema_decay": 0.99,
             "amp": False,
@@ -36,6 +36,11 @@ configs = {
             }
 
 def train_diff(configs):
+
+    # Restrict visible devices to avoid cross-GPU memory leakage (due to accelerate) hence using .to('cuda')
+    os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"]=configs['device'].split(":")[-1]
+
     # Create run folder
     assert os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}") == False, 'Name already taken. Please choose another folder name.'
     os.mkdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}")
@@ -60,7 +65,7 @@ def train_diff(configs):
             seq_length = configs['model_params']['seq_length'],
             timesteps  = configs['model_params']['timesteps'],
             objective  = 'pred_v',
-            ).to(configs['device'])
+            ).to('cuda')
 
     
     # 2) Load dataset
@@ -86,7 +91,8 @@ def train_diff(configs):
             amp                       = configs['amp'],  # turn on mixed precision
             lr_decay                  = configs['lr_decay'],
             lr_decay_gamma            = configs['lr_decay_gamma'],
-            model_save_path           = f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}"
+            model_save_path           = f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}",
+            device                    = 'cuda' # 'cuda' used instead of configs['device'] to avoid cross-GPU memory leakage
             )
     
     diffusion, train_loss_list, val_loss_list = trainer.train()
