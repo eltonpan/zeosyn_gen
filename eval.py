@@ -425,26 +425,24 @@ def get_metric_dataframes(configs):
     return mmd_zeo_agg_df, wsd_zeo_agg_df, mmd_zeo_osda_df, wsd_zeo_osda_df
     
 if __name__ == '__main__':
-    model_type = 'diff'
-    fname = 'v1'
-    split = 'system'
-
+    # #### Single model evaluation ####
+    # model_type = 'diff'
+    # fname = 'v1'
+    # split = 'system'
     # model, configs = load_model(model_type, fname, split)
     # syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs)
     # mmd_zeo_agg_df, wsd_zeo_agg_df = eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
     # mmd_zeo_osda_df, wsd_zeo_osda_df = eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
 
-    # #### Vary cond_scale ####
+    # #### Single model evaluation + Vary cond_scale ####
     # for cond_scale in [0.25, 0.5, 0.75, 1, 1.25, 1.5]:
     #     model, configs = load_model(model_type, fname, split)
     #     syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs, cond_scale=cond_scale)
 
-
-
-    # Run inference over multiple models, with varying cond_scales #
+    # #### Multiple model evaluation + Vary cond_scales ####
     model_type = 'diff'
     split = 'system'
-    for fname in ['v2', 'v3', 'v4', 'v5']:
+    for fname in ['v0-gae4', 'v0-gae8', 'v0-ema0.999']:
         for cond_scale in [0.75, 1, 1.25]:
             model, configs = load_model(model_type, fname, split)
             syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs, cond_scale=cond_scale)
