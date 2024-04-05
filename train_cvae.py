@@ -52,8 +52,8 @@ def train_cvae(model, configs):
     train_dataset = (train_dataset[1], train_dataset[5], train_dataset[15])
     val_dataset   = (val_dataset[1],   val_dataset[5],   val_dataset[15])
 
-    train_loader = DataLoader(list(zip(*train_dataset)), batch_size=2048, shuffle=True)
-    val_loader  = DataLoader(list(zip(*val_dataset)),  batch_size=2048, shuffle=False)
+    train_loader = DataLoader(list(zip(*train_dataset)), batch_size=configs['batch_size'], shuffle=True)
+    val_loader  = DataLoader(list(zip(*val_dataset)),  batch_size=configs['batch_size'], shuffle=False)
 
     best_model = None # Model to be outputted based on val loss
     train_loss_list  = []
