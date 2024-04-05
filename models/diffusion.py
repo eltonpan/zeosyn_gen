@@ -896,6 +896,7 @@ class Trainer1D(object):
         lr_decay = False,
         lr_decay_gamma = 0.9,
         model_save_path = None,
+        device = 'cuda',
     ):
         super().__init__()
 
