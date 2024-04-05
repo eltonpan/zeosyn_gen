@@ -28,7 +28,7 @@ configs = {
                         'osda_h_dims': 64, 
                         'syn_dims': 12, 
                         'zeo_feat_dims': 143, 
-                        'osda_feat_dims': 14
+                        'osda_feat_dims': 14,
                         },
             }
 
