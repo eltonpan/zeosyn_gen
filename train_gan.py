@@ -114,8 +114,8 @@ def discriminator_step(batch_size, discriminator, generator, d_optimizer, criter
 def train_gan(generator, discriminator, configs):
 
     # Create run folder
-    # assert os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}") == False, 'Name already taken. Please choose another folder name.'
-    # os.mkdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}")
+    assert os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}") == False, 'Name already taken. Please choose another folder name.'
+    os.mkdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}")
 
     # Save configs
     with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/configs.json", "w") as outfile:
@@ -222,11 +222,8 @@ def train_gan(generator, discriminator, configs):
         pickle.dump(d_train_loss_list, file)
     with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/d_val_loss_list.pkl", 'wb') as file:
         pickle.dump(d_val_loss_list, file)
-        
-    return generator, discriminator
 
 if __name__ == '__main__':
     generator = Generator(generator_layer_size=configs['model_params']['generator_layer_size'], z_dims=configs['model_params']['z_dims'])
     discriminator = Discriminator(discriminator_layer_size=configs['model_params']['discriminator_layer_size'])
     train_gan(generator, discriminator, configs)
-    # pdb.set_trace()
