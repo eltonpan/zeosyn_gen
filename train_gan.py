@@ -9,7 +9,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 import data.utils as utils
 sys.modules['utils'] = utils # Way to get around relative imports in utils for ZeoSynGen_dataset # https://stackoverflow.com/questions/2121874/python-pickling-after-changing-a-modules-directory
-# from torch.utils.data import DataLoader
 from torch_geometric.loader import DataLoader
 from tqdm import tqdm
 from models.gan import Generator, Discriminator
