@@ -21,7 +21,7 @@ configs = {
             'fname': 'v0',
             'device' : 'cuda:0',
             'batch_size' : 2048,
-            'n_epochs' : 200, # 2e4
+            'n_epochs' : 100, # 2e4
             'lr' : 1e-4,
             'model_params':{
                         'z_dims': 10,
@@ -207,8 +207,7 @@ def train_gan(generator, discriminator, configs):
 
                 print('VAL Epoch {} g_loss: {}, d_loss: {}'.format(epoch, g_loss_val, d_loss_val))
 
-
-        g_train_loss_list.append(d_loss_train.item())
+        g_train_loss_list.append(g_loss_train.item())
         d_train_loss_list.append(d_loss_train.item())
         g_val_loss_list.append(g_loss_val.item())
         d_val_loss_list.append(d_loss_val.item())
@@ -224,7 +223,7 @@ def train_gan(generator, discriminator, configs):
     with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/d_val_loss_list.pkl", 'wb') as file:
         pickle.dump(d_val_loss_list, file)
         
-    return generator, discriminator, g_train_loss_list, d_train_loss_list
+    return generator, discriminator
 
 if __name__ == '__main__':
     generator = Generator(generator_layer_size=configs['model_params']['generator_layer_size'], z_dims=configs['model_params']['z_dims'])
