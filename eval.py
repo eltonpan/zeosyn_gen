@@ -12,6 +12,7 @@ from einops import repeat
 from models.cvae import CVAEv1, CVAEv2
 from models.gan import Generator
 from models.nf import ConditionalNormalizingFlow
+from models.bnn import BayesLinear
 from models.diffusion import *
 from data.metrics import maximum_mean_discrepancy, wasserstein_distance, abs_error
 from sklearn.metrics import r2_score
@@ -67,6 +68,12 @@ def load_model(model_type, fname, split):
         model.load_state_dict(torch.load(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/model.pt", map_location=configs['device']))
         model.eval()
     
+    elif model_type == 'bnn':
+        model = nn.Sequential(BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=157, out_features=100), nn.ReLU(), BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=100, out_features=12),)
+        model.load_state_dict(torch.load(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/best_model.pt", map_location=configs['device']))
+        model = model.to(configs['device'])
+        model.eval()
+
     elif model_type == 'random':
         model = None 
 
@@ -89,7 +96,7 @@ def get_prediction_and_ground_truths(model, configs, cond_scale=None):
     # Get test zeolites and OSDAs
     zeo_code, zeo, osda_smiles, osda, = test_dataset[3], test_dataset[5], test_dataset[13], test_dataset[15],
 
-    if configs['model_type'] in ['cvae', 'gan', 'nf', 'random']: # prediction csv filename
+    if configs['model_type'] in ['cvae', 'gan', 'nf', 'bnn', 'random']: # prediction csv filename
         pred_fname = "syn_pred_agg.csv"
     elif configs['model_type'] == 'diff':
         assert cond_scale != None, 'cond_scale must be provided for diffusion model'
@@ -160,6 +167,15 @@ def get_prediction_and_ground_truths(model, configs, cond_scale=None):
             syn_pred = np.zeros([len(zeo), len(dataset.ratio_names)+len(dataset.cond_names)])
             for idx, col in enumerate(dataset.ratio_names+dataset.cond_names):
                 syn_pred[:,idx] = np.random.uniform(syn.min(0)[col], syn.max(0)[col], len(zeo))
+
+        elif configs['model_type'] == 'bnn':
+            assert cond_scale == None, 'cond_scale must not be provided for CVAE model'
+            zeo_code = repeat(np.array(zeo_code), 'n -> (repeat n)', repeat=50)
+            zeo = repeat(zeo, 'n d -> (repeat n) d', repeat=50)
+            osda_smiles = repeat(np.array(osda_smiles), 'n -> (repeat n)', repeat=50)
+            osda = repeat(osda, 'n d -> (repeat n) d', repeat=50)
+            zeo_osda = torch.cat([zeo, osda], dim=1).to(configs['device'])
+            syn_pred = torch.tensor(model(zeo_osda).cpu().detach().numpy())
 
         # Scale synthesis conditions back
         if configs['model_type'] != 'random':
@@ -479,7 +495,7 @@ def get_metric_dataframes(configs):
     
 if __name__ == '__main__':
     #### Single model evaluation ####
-    model_type = 'random'
+    model_type = 'bnn'
     fname = 'v0'
     split = 'system'
     model, configs = load_model(model_type, fname, split)
