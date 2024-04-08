@@ -154,12 +154,20 @@ def get_prediction_and_ground_truths(model, configs, cond_scale=None):
             zeo = repeat(zeo, 'n d -> (repeat n) d', repeat=50)
             osda_smiles = repeat(np.array(osda_smiles), 'n -> (repeat n)', repeat=50)
             osda = repeat(osda, 'n d -> (repeat n) d', repeat=50)
-            syn_pred = torch.rand(len(zeo), len(dataset.ratio_names)+len(dataset.cond_names))
+
+            # get all datapoints and get upper and lower limits
+            syn = dataset.get_datapoints_by_index(range(len(dataset)), scaled=False, return_dataframe=True)[1]
+            syn_pred = np.zeros([len(zeo), len(dataset.ratio_names)+len(dataset.cond_names)])
+            for idx, col in enumerate(dataset.ratio_names+dataset.cond_names):
+                syn_pred[:,idx] = np.random.uniform(syn.min(0)[col], syn.max(0)[col], len(zeo))
 
         # Scale synthesis conditions back
-        for ratio_idx, ratio in enumerate(dataset.ratio_names+dataset.cond_names):
-            qt = dataset.qts[ratio] # load quantile transformer
-            syn_pred[:,ratio_idx] = torch.tensor(qt.inverse_transform(syn_pred[:,ratio_idx].reshape(-1, 1))).reshape(-1) # transform back
+        if configs['model_type'] != 'random':
+            for ratio_idx, ratio in enumerate(dataset.ratio_names+dataset.cond_names):
+                qt = dataset.qts[ratio] # load quantile transformer
+                syn_pred[:,ratio_idx] = torch.tensor(qt.inverse_transform(syn_pred[:,ratio_idx].reshape(-1, 1))).reshape(-1) # transform back
+
+        # Save predictions
         syn_pred = pd.DataFrame(syn_pred, columns=dataset.ratio_names+dataset.cond_names)
         syn_pred['zeo'], syn_pred['osda'] = zeo_code, osda_smiles
         syn_pred.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/{pred_fname}", index=False)
