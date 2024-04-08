@@ -69,7 +69,9 @@ def load_model(model_type, fname, split):
         model.eval()
     
     elif model_type == 'bnn':
-        model = nn.Sequential(BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=157, out_features=100), nn.ReLU(), BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=100, out_features=12),)
+        model = nn.Sequential(BayesLinear(prior_mu=configs['model_params']['prior_mu'], prior_sigma=configs['model_params']['prior_sigma'], in_features=157, out_features=128), 
+                          nn.ReLU(), 
+                          BayesLinear(prior_mu=configs['model_params']['prior_mu'], prior_sigma=configs['model_params']['prior_sigma'], in_features=128, out_features=12),)
         model.load_state_dict(torch.load(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/best_model.pt", map_location=configs['device']))
         model = model.to(configs['device'])
         model.eval()

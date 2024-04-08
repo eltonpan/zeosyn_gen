@@ -19,25 +19,19 @@ configs = {
             'fname': 'v0',
             'device' : 'cuda:0',
             'batch_size' : 8192,
-            'n_epochs' : 3000, 
+            'n_epochs' : 10000, 
             'lr' : 1e-4,
-            # 'model_params':{
-            #             'z_dims': 10,
-            #             'generator_layer_size': [16, 32, 64],
-            #             'discriminator_layer_size' :[64, 32, 16],
-            #             'zeo_h_dims': 64, 
-            #             'osda_h_dims': 64, 
-            #             'syn_dims': 12, 
-            #             'zeo_feat_dims': 143, 
-            #             'osda_feat_dims': 14,
-            #             },
+            'model_params':{
+                          'prior_mu': 0,
+                          'prior_sigma': 0.1,
+                        },
             }
 
 def train_bnn(model, configs):
 
-    # # Create run folder
-    # assert os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}") == False, 'Name already taken. Please choose another folder name.'
-    # os.mkdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}")
+    # Create run folder
+    assert os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}") == False, 'Name already taken. Please choose another folder name.'
+    os.mkdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}")
 
     # Save configs
     with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/configs.json", "w") as outfile:
@@ -120,5 +114,7 @@ def train_bnn(model, configs):
         pickle.dump(val_loss_list, file)
 
 if __name__ == '__main__':
-    model = nn.Sequential(bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=157, out_features=100), nn.ReLU(), bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=100, out_features=12),)
+    model = nn.Sequential(bnn.BayesLinear(prior_mu=configs['model_params']['prior_mu'], prior_sigma=configs['model_params']['prior_sigma'], in_features=157, out_features=128), 
+                          nn.ReLU(), 
+                          bnn.BayesLinear(prior_mu=configs['model_params']['prior_mu'], prior_sigma=configs['model_params']['prior_sigma'], in_features=128, out_features=12),)
     train_bnn(model, configs)
