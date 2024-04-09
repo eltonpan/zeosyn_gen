@@ -75,7 +75,15 @@ def load_model(model_type, fname, split):
         model.load_state_dict(torch.load(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/best_model.pt", map_location=configs['device']))
         model = model.to(configs['device'])
         model.eval()
-
+    
+    elif model_type == 'gmm':
+        try: # requires tensorflow. make sure to run with "cde" environment
+            with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/model.pkl", 'rb') as f:
+                model = pickle.load(f)
+        except Exception as e:
+            print(e)
+            model = None
+            
     elif model_type == 'random':
         model = None 
 
@@ -98,7 +106,7 @@ def get_prediction_and_ground_truths(model, configs, cond_scale=None):
     # Get test zeolites and OSDAs
     zeo_code, zeo, osda_smiles, osda, = test_dataset[3], test_dataset[5], test_dataset[13], test_dataset[15],
 
-    if configs['model_type'] in ['cvae', 'gan', 'nf', 'bnn', 'random']: # prediction csv filename
+    if configs['model_type'] in ['cvae', 'gan', 'nf', 'bnn', 'gmm', 'random']: # prediction csv filename
         pred_fname = "syn_pred_agg.csv"
     elif configs['model_type'] == 'diff':
         assert cond_scale != None, 'cond_scale must be provided for diffusion model'
@@ -169,6 +177,26 @@ def get_prediction_and_ground_truths(model, configs, cond_scale=None):
             syn_pred = np.zeros([len(zeo), len(dataset.ratio_names)+len(dataset.cond_names)])
             for idx, col in enumerate(dataset.ratio_names+dataset.cond_names):
                 syn_pred[:,idx] = np.random.uniform(syn.min(0)[col], syn.max(0)[col], len(zeo))
+
+        elif configs['model_type'] == 'gmm':
+            assert cond_scale == None, 'cond_scale must not be provided for CVAE model'
+            zeo_code = repeat(np.array(zeo_code), 'n -> (repeat n)', repeat=50)
+            zeo = repeat(zeo, 'n d -> (repeat n) d', repeat=50)
+            osda_smiles = repeat(np.array(osda_smiles), 'n -> (repeat n)', repeat=50)
+            osda = repeat(osda, 'n d -> (repeat n) d', repeat=50)
+
+            X = torch.cat([zeo, osda], dim=1).numpy()
+
+            syn_pred_chunks = []
+            for i in range(0,len(X),2):
+                print(i)
+                try:
+                    syn_pred = model.sample(X[i:i+2])[1]
+                except Exception as e:
+                    print(e)
+                syn_pred_chunks.append(syn_pred)
+
+            syn_pred = np.concatenate(syn_pred_chunks, axis=0)
 
         elif configs['model_type'] == 'bnn':
             assert cond_scale == None, 'cond_scale must not be provided for CVAE model'
@@ -497,7 +525,7 @@ def get_metric_dataframes(configs):
     
 if __name__ == '__main__':
     #### Single model evaluation ####
-    model_type = 'bnn'
+    model_type = 'gmm'
     fname = 'v0'
     split = 'system'
     model, configs = load_model(model_type, fname, split)
