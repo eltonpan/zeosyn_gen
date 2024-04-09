@@ -1,4 +1,4 @@
-# Chemically-Guided Diffusion Denoising Enables Zeolite Synthesis Planning
+# Chemically-Guided Generative Diffusion Model Enables Zeolite Synthesis Planning
 
 <p align="center">
 <img src="/figs/denoising_diffusion.gif" width="200" />
@@ -10,11 +10,9 @@
 - `data/get_zeo_graphs.ipynb`: Get zeolite graphs resulting in `data/zeo2graph.pkl`
 - `data/process_zeosyn.ipynb`: Preprocess `data/ZEOSYN-2.xlsx` to give `data/ZeoSynGen_dataset.pkl` (dataset object)
 - `data/augmentation.ipynb`: Visualize and analyze `data/ZeoSynGen_dataset.pkl` for augmentation purposes
-- `train_cvae.py`: Train CVAE model
-- `train_diff.py`: Train diffusion model
+- `train_X.py`: Train X model
 - `eval.py`: Evaluate CVAE or diffusion model(s)
-- `notebooks/visualize_pred_cvae.ipynb`: Visualizations of CVAE predictions
-- `notebooks/visualize_pred_diff.ipynb`: Visualizations of diffusion predictions
+- `notebooks/visualize_pred_X.ipynb`: Visualizations of model X predictions
 - `notebooks/compare_cvae_v9_v10.ipynb`: Qualitative validation of MMD/WSD metrics by comparing CVAE predictions (from models v9 and v10) to grouth truth
 - `notebooks/tune_diff_hyperparams.ipynb`: Investigation of the effect cond_drop_prob and cond_scale on diffusion performance
 
