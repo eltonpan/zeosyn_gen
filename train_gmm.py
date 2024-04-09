@@ -6,7 +6,6 @@ import torch
 import data.utils as utils
 sys.modules['utils'] = utils # Way to get around relative imports in utils for ZeoSynGen_dataset # https://stackoverflow.com/questions/2121874/python-pickling-after-changing-a-modules-directory
 from torch_geometric.loader import DataLoader
-from cde.density_simulation import SkewNormal
 from cde.density_estimator import KernelMixtureNetwork, LSConditionalDensityEstimation, MixtureDensityNetwork, ConditionalKernelDensityEstimation
 import numpy as np
 import pdb
@@ -25,9 +24,9 @@ configs = {
 
 def train_gmm(model, configs):
 
-    # # Create run folder
-    # assert os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}") == False, 'Name already taken. Please choose another folder name.'
-    # os.mkdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}")
+    # Create run folder
+    assert os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}") == False, 'Name already taken. Please choose another folder name.'
+    os.mkdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}")
 
     # Save configs
     with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/configs.json", "w") as outfile:
