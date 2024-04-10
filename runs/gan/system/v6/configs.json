@@ -1,0 +1,27 @@
+{
+    "model_type": "gan",
+    "split": "system",
+    "fname": "v6",
+    "device": "cuda:1",
+    "batch_size": 2048,
+    "n_epochs": 3200,
+    "lr": 0.0001,
+    "model_params": {
+        "z_dims": 10,
+        "generator_layer_size": [
+            64,
+            128,
+            256
+        ],
+        "discriminator_layer_size": [
+            256,
+            128,
+            64
+        ],
+        "zeo_h_dims": 64,
+        "osda_h_dims": 64,
+        "syn_dims": 12,
+        "zeo_feat_dims": 143,
+        "osda_feat_dims": 14
+    }
+}
