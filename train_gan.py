@@ -17,15 +17,15 @@ from torch.autograd import Variable
 configs = { 
             'model_type' : 'gan',
             'split' : 'system',
-            'fname': 'v0',
-            'device' : 'cuda:0',
+            'fname': 'v6',
+            'device' : 'cuda:1',
             'batch_size' : 2048,
-            'n_epochs' : 100, # 2e4
+            'n_epochs' : 3200, # 2e4
             'lr' : 1e-4,
             'model_params':{
                         'z_dims': 10,
-                        'generator_layer_size': [16, 32, 64],
-                        'discriminator_layer_size' :[64, 32, 16],
+                        'generator_layer_size': [64, 128, 256],
+                        'discriminator_layer_size' :[256, 128, 64],
                         'zeo_h_dims': 64, 
                         'osda_h_dims': 64, 
                         'syn_dims': 12, 
