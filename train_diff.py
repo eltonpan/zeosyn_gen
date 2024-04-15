@@ -10,8 +10,8 @@ import pdb
 configs = {
             "model_type" : "diff",
             "split" : "system",
-            "fname": "v0-gae8",
-            "device" : "cuda:3",
+            "fname": "v0-ts2000",
+            "device" : "cuda:2",
             "train_batch_size": 32,
             "train_lr": 4e-4,
             "train_num_steps": 1e5, # 1e6
@@ -20,18 +20,20 @@ configs = {
             "amp": False,
             "lr_decay": False,
             "lr_decay_gamma": 0.99999,
+            "save_all_model_checkpoints": False,
             "model_params":{
                             "dim": 12,
                             "dim_mults": (32, 64, 128),
                             "channels": 1,
                             "resnet_block_groups": 4,
-                            "cond_drop_prob": 0.2, # 0.05
+                            "cond_drop_prob": 0.05, 
                             "seq_length": 12,
                             "timesteps": 1000,
                             "zeo_feat_dims": 143, 
                             "osda_feat_dims": 14,
                             "zeo_h_dims": 64, 
                             "osda_h_dims": 64,
+                            "dropout": False,
                             },
             }
 
@@ -58,6 +60,7 @@ def train_diff(configs):
             zeo_feat_dims       = configs['model_params']['zeo_feat_dims'],
             osda_feat_dims      = configs['model_params']['osda_feat_dims'],
             cond_drop_prob      = configs['model_params']['cond_drop_prob'],
+            dropout             = configs['model_params']['dropout'],
             )
 
     diffusion = GaussianDiffusion1D(
@@ -92,6 +95,7 @@ def train_diff(configs):
             lr_decay                  = configs['lr_decay'],
             lr_decay_gamma            = configs['lr_decay_gamma'],
             model_save_path           = f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}",
+            save_all_model_checkpoints = configs['save_all_model_checkpoints'],
             device                    = 'cuda' # 'cuda' used instead of configs['device'] to avoid cross-GPU memory leakage
             )
     

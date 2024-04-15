@@ -14,14 +14,19 @@ from models.gan import Generator
 from models.nf import ConditionalNormalizingFlow
 from models.bnn import BayesLinear
 from models.diffusion import *
+from models.nn import NN
 from data.metrics import maximum_mean_discrepancy, wasserstein_distance, abs_error
 from sklearn.metrics import r2_score
 import pdb
 
-def load_model(model_type, fname, split):
+def load_model(model_type, fname, split, load_step=None):
     '''
     Load model and configs
+
+    Args:
+    load_step: Int. Step at which to load model. If None, loads model with lowest validation loss
     '''
+
     print('Loading model and configs...')
     # 1) Load configs
     with open(f'runs/{model_type}/{split}/{fname}/configs.json') as f:
@@ -56,6 +61,7 @@ def load_model(model_type, fname, split):
                 zeo_feat_dims       = configs['model_params']['zeo_feat_dims'],
                 osda_feat_dims      = configs['model_params']['osda_feat_dims'],
                 cond_drop_prob      = configs['model_params']['cond_drop_prob'],
+                dropout             = configs['model_params']['dropout'],
                 )
 
         model = GaussianDiffusion1D(
@@ -64,10 +70,21 @@ def load_model(model_type, fname, split):
                 timesteps  = configs['model_params']['timesteps'],
                 objective  = 'pred_v',
                 ).to(configs['device'])
+        
+        if 'save_all_model_checkpoints' not in configs.keys(): # Retro-fit for old configs
+            configs['save_all_model_checkpoints'] = False
 
-        model.load_state_dict(torch.load(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/model.pt", map_location=configs['device']))
+        if configs['save_all_model_checkpoints']:
+            if load_step == None:
+                files = [f for f in os.listdir() if (os.path.isfile(f)) and (".pt" in f)]
+                steps = [str(f.split('model_ep')[:-3]) for f in files]
+                load_step = max(steps)
+            print(f'Loading model at step {load_step}...')
+            model.load_state_dict(torch.load(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/model_ep{load_step}.pt", map_location=configs['device']))
+        else:
+            model.load_state_dict(torch.load(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/model.pt", map_location=configs['device']))
         model.eval()
-    
+
     elif model_type == 'bnn':
         model = nn.Sequential(BayesLinear(prior_mu=configs['model_params']['prior_mu'], prior_sigma=configs['model_params']['prior_sigma'], in_features=157, out_features=128), 
                           nn.ReLU(), 
@@ -83,6 +100,12 @@ def load_model(model_type, fname, split):
         except Exception as e:
             print(e)
             model = None
+    
+    elif model_type == 'nn':
+        model = NN(**configs['model_params'])
+        model.load_state_dict(torch.load(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/best_model.pt", map_location=configs['device']))
+        model = model.to(configs['device'])
+        model.eval()
             
     elif model_type == 'random':
         model = None 
@@ -106,7 +129,7 @@ def get_prediction_and_ground_truths(model, configs, cond_scale=None):
     # Get test zeolites and OSDAs
     zeo_code, zeo, osda_smiles, osda, = test_dataset[3], test_dataset[5], test_dataset[13], test_dataset[15],
 
-    if configs['model_type'] in ['cvae', 'gan', 'nf', 'bnn', 'gmm', 'random']: # prediction csv filename
+    if configs['model_type'] in ['cvae', 'gan', 'nf', 'bnn', 'gmm', 'nn', 'random']: # prediction csv filename
         pred_fname = "syn_pred_agg.csv"
     elif configs['model_type'] == 'diff':
         assert cond_scale != None, 'cond_scale must be provided for diffusion model'
@@ -147,7 +170,8 @@ def get_prediction_and_ground_truths(model, configs, cond_scale=None):
 
         elif configs['model_type'] == 'diff':
             print(f"Predicting using diffusion model with cond_scale of {cond_scale}")
-            n_samples = 50
+            # n_samples = 50
+            n_samples = 25
             zeo_code, osda_smiles = repeat(np.array(zeo_code), 'n -> (repeat n)', repeat=n_samples), repeat(np.array(osda_smiles), 'n -> (repeat n)', repeat=n_samples)
             zeo, osda = repeat(zeo, 'n d -> (repeat n) d', repeat=n_samples), repeat(osda, 'n d -> (repeat n) d', repeat=n_samples)
             zeo, osda = zeo.to(configs['device']), osda.to(configs['device'])
@@ -206,6 +230,15 @@ def get_prediction_and_ground_truths(model, configs, cond_scale=None):
             osda = repeat(osda, 'n d -> (repeat n) d', repeat=50)
             zeo_osda = torch.cat([zeo, osda], dim=1).to(configs['device'])
             syn_pred = torch.tensor(model(zeo_osda).cpu().detach().numpy())
+
+        elif configs['model_type'] == 'nn':
+            assert cond_scale == None, 'cond_scale must not be provided for CVAE model'
+            zeo_code = repeat(np.array(zeo_code), 'n -> (repeat n)', repeat=50)
+            zeo = repeat(zeo, 'n d -> (repeat n) d', repeat=50)
+            osda_smiles = repeat(np.array(osda_smiles), 'n -> (repeat n)', repeat=50)
+            osda = repeat(osda, 'n d -> (repeat n) d', repeat=50)
+            zeo, osda = zeo.to(configs['device']), osda.to(configs['device'])
+            syn_pred = torch.tensor(model(zeo, osda).cpu().detach().numpy())
 
         # Scale synthesis conditions back
         if configs['model_type'] != 'random':
@@ -524,24 +557,24 @@ def get_metric_dataframes(configs):
     return mmd_zeo_agg_df, wsd_zeo_agg_df, mmd_zeo_osda_df, wsd_zeo_osda_df
     
 if __name__ == '__main__':
-    #### Single model evaluation ####
-    model_type = 'gmm'
-    fname = 'v0'
-    split = 'system'
-    model, configs = load_model(model_type, fname, split)
-    syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs)
-    mmd_zeo_agg_df, wsd_zeo_agg_df = eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
-    mmd_zeo_osda_df, wsd_zeo_osda_df = eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
+    # #### Single model evaluation ####
+    # model_type = 'gan'
+    # fname = 'v3'
+    # split = 'system'
+    # model, configs = load_model(model_type, fname, split)
+    # syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs)
+    # mmd_zeo_agg_df, wsd_zeo_agg_df = eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
+    # mmd_zeo_osda_df, wsd_zeo_osda_df = eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
 
-    # #### Single model evaluation + Vary cond_scale ####
+    # #### Single diffusion model evaluation + Vary cond_scale ####
     # for cond_scale in [0.25, 0.5, 0.75, 1, 1.25, 1.5]:
     #     model, configs = load_model(model_type, fname, split)
     #     syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs, cond_scale=cond_scale)
 
-    # #### Multiple model evaluation + Vary cond_scales ####
-    # model_type = 'diff'
-    # split = 'system'
-    # for fname in ['v0-adambetas-0.9-0.999', 'v0-lr_decay0.999', 'v0-lr_decay0.9999', 'v0-lr_decay0.99999', 'v0-lr_decay0.999999']:
-    #     for cond_scale in [0.75, 1, 1.25]:
-    #         model, configs = load_model(model_type, fname, split)
-    #         syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs, cond_scale=cond_scale)
+    #### Multiple diffusion model evaluation + Vary cond_scales ####
+    model_type = 'diff'
+    split = 'system'
+    for fname in ['v0-dropout']:
+        for cond_scale in [0.75, 1]:
+            model, configs = load_model(model_type, fname, split)
+            syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs, cond_scale=cond_scale)
