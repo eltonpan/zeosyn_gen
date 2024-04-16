@@ -53,6 +53,11 @@ def load_model(model_type, fname, split, load_step=None):
         model.eval()
     
     elif model_type == 'diff':
+        if 'save_all_model_checkpoints' not in configs.keys(): # Retro-fit for old configs
+            configs['save_all_model_checkpoints'] = False
+        if 'dropout' not in configs['model_params'].keys(): # Retro-fit for old configs
+            configs['model_params']['dropout'] = False
+
         unet = Unet1D(
                 dim                 = configs['model_params']['dim'],
                 dim_mults           = configs['model_params']['dim_mults'],
@@ -71,8 +76,6 @@ def load_model(model_type, fname, split, load_step=None):
                 objective  = 'pred_v',
                 ).to(configs['device'])
         
-        if 'save_all_model_checkpoints' not in configs.keys(): # Retro-fit for old configs
-            configs['save_all_model_checkpoints'] = False
 
         if configs['save_all_model_checkpoints']:
             if load_step == None:
@@ -574,7 +577,7 @@ if __name__ == '__main__':
     #### Multiple diffusion model evaluation + Vary cond_scales ####
     model_type = 'diff'
     split = 'system'
-    for fname in ['v0-dropout']:
+    for fname in ['v0-ts100', 'v0-ts2000']:
         for cond_scale in [0.75, 1]:
             model, configs = load_model(model_type, fname, split)
             syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs, cond_scale=cond_scale)
