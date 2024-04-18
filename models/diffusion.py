@@ -327,6 +327,7 @@ class Unet1D(nn.Module):
         learned_sinusoidal_cond = False,
         random_fourier_features = False,
         learned_sinusoidal_dim = 16,
+        dropout = False,
     ):
         super().__init__()
 
@@ -337,6 +338,7 @@ class Unet1D(nn.Module):
         self.osda_feat_dims = osda_feat_dims
         self.zeo_h_dims = zeo_h_dims
         self.osda_h_dims = osda_h_dims
+        self.dropout = dropout
 
         # determine dimensions
 
@@ -371,25 +373,37 @@ class Unet1D(nn.Module):
             nn.Linear(time_dim, time_dim)
         )
 
-        # condition
-        # self.cond_enc = nn.Sequential( # encodes input cond
-        #     nn.Linear(cond_dim, dim),
-        #     nn.GELU(),
-        #     nn.Linear(dim, dim),
-        # )
+        if self.dropout:
+            self.zeo_mlp = nn.Sequential(nn.Linear(self.zeo_feat_dims, 256),
+                                        nn.ReLU(),
+                                        nn.Dropout(0.2),
+                                        nn.Linear(256, 128),
+                                        nn.ReLU(),
+                                        nn.Dropout(0.2),
+                                        nn.Linear(128, self.zeo_h_dims),
+                                        )
+            self.osda_mlp = nn.Sequential(nn.Linear(self.osda_feat_dims, 256),
+                                        nn.ReLU(),
+                                        nn.Dropout(0.2),
+                                        nn.Linear(256, 128),
+                                        nn.ReLU(),
+                                        nn.Dropout(0.2),
+                                        nn.Linear(128, self.osda_h_dims),
+                                        )
 
-        self.zeo_mlp = nn.Sequential(nn.Linear(self.zeo_feat_dims, 256),
-                                     nn.ReLU(),
-                                     nn.Linear(256, 128),
-                                     nn.ReLU(),
-                                     nn.Linear(128, self.zeo_h_dims),
-                                    )
-        self.osda_mlp = nn.Sequential(nn.Linear(self.osda_feat_dims, 256),
-                                     nn.ReLU(),
-                                     nn.Linear(256, 128),
-                                     nn.ReLU(),
-                                     nn.Linear(128, self.osda_h_dims),
-                                    )
+        else:
+            self.zeo_mlp = nn.Sequential(nn.Linear(self.zeo_feat_dims, 256),
+                                        nn.ReLU(),
+                                        nn.Linear(256, 128),
+                                        nn.ReLU(),
+                                        nn.Linear(128, self.zeo_h_dims),
+                                        )
+            self.osda_mlp = nn.Sequential(nn.Linear(self.osda_feat_dims, 256),
+                                        nn.ReLU(),
+                                        nn.Linear(256, 128),
+                                        nn.ReLU(),
+                                        nn.Linear(128, self.osda_h_dims),
+                                        )
         
         # Random embedding assigned to null class for classifier-free guidance
         # self.null_cond_emb = nn.Parameter(torch.randn(dim)) # NOTE: dim used instead of cond_dim since cond_emb goes through encoder, but null_cond_emb doesn't
@@ -398,16 +412,19 @@ class Unet1D(nn.Module):
     
         cond_dim = dim * 4
 
-        # self.cond_mlp = nn.Sequential(
-        #     nn.Linear(dim, cond_dim),
-        #     nn.GELU(),
-        #     nn.Linear(cond_dim, cond_dim)
-        # )
-        self.cond_mlp = nn.Sequential(
-            nn.Linear(zeo_h_dims+self.osda_h_dims, cond_dim),
-            nn.ReLU(),
-            nn.Linear(cond_dim, cond_dim)
-        )
+        if self.dropout:
+            self.cond_mlp = nn.Sequential(
+                nn.Linear(zeo_h_dims+self.osda_h_dims, cond_dim),
+                nn.ReLU(),
+                nn.Dropout(0.2),
+                nn.Linear(cond_dim, cond_dim)
+            )
+        else:
+            self.cond_mlp = nn.Sequential(
+                nn.Linear(zeo_h_dims+self.osda_h_dims, cond_dim),
+                nn.ReLU(),
+                nn.Linear(cond_dim, cond_dim)
+            )
 
         # layers
 
@@ -896,6 +913,7 @@ class Trainer1D(object):
         lr_decay = False,
         lr_decay_gamma = 0.9,
         model_save_path = None,
+        save_all_model_checkpoints = False,
         device = 'cuda',
     ):
         super().__init__()
@@ -953,6 +971,7 @@ class Trainer1D(object):
             self.scheduler = ExponentialLR(self.opt, gamma=lr_decay_gamma)
         
         self.model_save_path = model_save_path
+        self.save_all_model_checkpoints = save_all_model_checkpoints
 
         # for logging results in a folder periodically
 
@@ -1090,7 +1109,10 @@ class Trainer1D(object):
                         if total_val_loss < best_val_loss: # if val loss has decreased
                             best_val_loss = total_val_loss # update best val loss
                             # best_model    = copy.deepcopy(self.model) # update best model
-                            torch.save(self.model.state_dict(), f"{self.model_save_path}/model.pt")
+                            if self.save_all_model_checkpoints:
+                                torch.save(self.model.state_dict(), f"{self.model_save_path}/model_ep{self.step}.pt")
+                            else:
+                                torch.save(self.model.state_dict(), f"{self.model_save_path}/model.pt")
                             print()
                             print('Best model saved at Epoch {}'.format(self.step))
                             module_logger.info('\n Best model saved at Epoch {} \n'.format(self.step))
