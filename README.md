@@ -29,6 +29,7 @@
 - `data/cbus-to_be_deleted.csv`: Zeolite CBUs
 - `data/osda_descriptors.csv`: OSDA physicochemical descriptors
 - `data/iza_codes.py`: List of IZA codes
+- `data/zeolite_amd_distance_matrix.csv`: AMD distance matrix featurization of zeolite topologies as reported in Schwalbe-Koda et al (2023) https://github.com/dskoda/Zeolites-AMD/blob/main/data/iza_dm.csv
 
 **Others**
 - `data/get_dummy_graph.py`: Get placeholder graphs for amorphous phases and zeolites with no CIF files
