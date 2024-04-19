@@ -15,7 +15,7 @@ from models.nf import ConditionalNormalizingFlow
 from models.bnn import BayesLinear
 from models.diffusion import *
 from models.nn import NN
-from data.metrics import maximum_mean_discrepancy, wasserstein_distance, abs_error
+from data.metrics import maximum_mean_discrepancy, wasserstein_distance, abs_error, coverage
 from sklearn.metrics import r2_score
 import pdb
 
@@ -293,6 +293,7 @@ def eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled
     count = 0
     mmd_zeo_agg = {} # Dict of MMDs for each zeolite
     wsd_zeo_agg = {} # Dict of WSDs for each zeolite
+    cov_zeo_agg = {} # Dict of coverages for each zeolite
     ae_zeo_agg = {} # Dict of AEs for each zeolite
     for zeo in zeo_systems:
         if zeo != 'Dense/Amorphous':
@@ -303,6 +304,10 @@ def eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled
             sys_syn_pred_scaled, sys_syn_true_scaled = syn_pred_scaled[syn_pred_scaled['zeo'] == zeo], syn_true_scaled[syn_true_scaled['zeo'] == zeo]
             
             if eval:
+                # Coverage
+                cov = coverage(sys_syn_pred[dataset.ratio_names+dataset.cond_names], sys_syn_true[dataset.ratio_names+dataset.cond_names])
+                cov_zeo_agg[zeo] = cov
+
                 # Regression metrics
                 ae = abs_error(sys_syn_pred[dataset.ratio_names+dataset.cond_names], sys_syn_true[dataset.ratio_names+dataset.cond_names]) # use non-scaled version
                 ae_zeo_agg[zeo] = ae
@@ -330,6 +335,22 @@ def eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled
             break
     
     if eval:
+        # Save coverage metrics
+        prec_zeo_agg_df, rec_zeo_agg_df = pd.DataFrame({'zeo': cov_zeo_agg.keys()}), pd.DataFrame({'zeo': cov_zeo_agg.keys()})
+
+        for col in dataset.ratio_names+dataset.cond_names:
+            prec_zeo_agg_df[col+'_prec'] = [x['precision'][col] for x in cov_zeo_agg.values()]
+            rec_zeo_agg_df[col+'_rec'] = [x['recall'][col] for x in cov_zeo_agg.values()]
+        
+        prec_zeo_agg_df_mean, rec_zeo_agg_df_mean = prec_zeo_agg_df.mean(0), rec_zeo_agg_df.mean(0)
+
+        f1_zeo_agg_df_mean = pd.DataFrame((prec_zeo_agg_df_mean.to_numpy()+rec_zeo_agg_df_mean.to_numpy())/2, index=dataset.ratio_names+dataset.cond_names)
+        print(prec_zeo_agg_df_mean, rec_zeo_agg_df_mean, f1_zeo_agg_df_mean)
+
+        if num_systems == None:
+            prec_zeo_agg_df.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/prec_zeo_agg_df.csv", index=False)
+            rec_zeo_agg_df.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/rec_zeo_agg_df.csv", index=False)
+
         # Save regression metrics
         ae_zeo_agg_df = pd.DataFrame({'zeo': ae_zeo_agg.keys()})
         regs = {}
@@ -409,6 +430,7 @@ def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, data
     count = 0
     mmd_zeo_osda = {} # Dict of MMDs for each zeolite-osda 
     wsd_zeo_osda = {} # Dict of WSDs for each zeolite-osda 
+    cov_zeo_osda = {} # Dict of coverages for each zeolite
     ae_zeo_osda = {} # Dict of AEs for each zeolite-osda
     for zeo, osda in zeo_osda_systems:
         if zeo != 'Dense/Amorphous':
@@ -418,6 +440,10 @@ def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, data
             sys_syn_pred_scaled, sys_syn_true_scaled = syn_pred_scaled[(syn_pred_scaled['zeo'] == zeo) & (syn_pred_scaled['osda'] == osda)], syn_true_scaled[(syn_true_scaled['zeo'] == zeo) & (syn_true_scaled['osda'] == osda)]
 
             if eval:
+                # Coverage
+                cov = coverage(sys_syn_pred[dataset.ratio_names+dataset.cond_names], sys_syn_true[dataset.ratio_names+dataset.cond_names])
+                cov_zeo_osda[(zeo,osda)] = cov
+
                 # Regression metrics
                 ae = abs_error(sys_syn_pred[dataset.ratio_names+dataset.cond_names], sys_syn_true[dataset.ratio_names+dataset.cond_names]) # use non-scaled version
                 ae_zeo_osda[(zeo,osda)] = ae
@@ -442,6 +468,21 @@ def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, data
         if count == num_systems:
             break
     if eval:
+        # Save coverage metrics
+        prec_zeo_osda_df, rec_zeo_osda_df = pd.DataFrame({'zeo': [z for z, _ in [*cov_zeo_osda]], 'osda': [o for _, o in [*cov_zeo_osda]]}), pd.DataFrame({'zeo': [z for z, _ in [*cov_zeo_osda]], 'osda': [o for _, o in [*cov_zeo_osda]]})
+
+        for col in dataset.ratio_names+dataset.cond_names:
+            prec_zeo_osda_df[col+'_prec'] = [x['precision'][col] for x in cov_zeo_osda.values()]
+            rec_zeo_osda_df[col+'_rec'] = [x['recall'][col] for x in cov_zeo_osda.values()]
+        
+        prec_zeo_osda_df_mean, rec_zeo_osda_df_mean = prec_zeo_osda_df.mean(0), rec_zeo_osda_df.mean(0)
+        f1_zeo_osda_df_mean = pd.DataFrame((prec_zeo_osda_df_mean.to_numpy()+rec_zeo_osda_df_mean.to_numpy())/2, index=dataset.ratio_names+dataset.cond_names)
+        print(prec_zeo_osda_df_mean, rec_zeo_osda_df_mean, f1_zeo_osda_df_mean)
+
+        if num_systems == None:
+            prec_zeo_osda_df.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/prec_zeo_osda_df.csv", index=False)
+            rec_zeo_osda_df.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/rec_zeo_osda_df.csv", index=False)
+
         # Save regression metrics
         ae_zeo_osda_df = pd.DataFrame({'zeo': [z for z, _ in [*ae_zeo_osda]], 'osda': [o for _, o in [*ae_zeo_osda]]})
         regs = {}
@@ -561,13 +602,20 @@ def get_metric_dataframes(configs):
     
 if __name__ == '__main__':
     # #### Single model evaluation ####
-    # model_type = 'gan'
-    # fname = 'v3'
-    # split = 'system'
-    # model, configs = load_model(model_type, fname, split)
-    # syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs)
-    # mmd_zeo_agg_df, wsd_zeo_agg_df = eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
-    # mmd_zeo_osda_df, wsd_zeo_osda_df = eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
+    # for model_type, fname, split in [
+    #                                 ('random', 'v0', 'system'),
+    #                                 ('nn', 'v0', 'system'),
+    #                                 ('bnn', 'v0', 'system'),
+    #                                 ('gmm', 'v0', 'system'),
+    #                                 ('gan', 'v3', 'system'),
+    #                                 ('nf', 'v0', 'system'),
+    #                                 ('cvae', 'v10', 'system'),
+    #                                 ('diff', 'v3', 'system'),
+    #                                 ]:
+    #     model, configs = load_model(model_type, fname, split)
+    #     syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs)
+    #     mmd_zeo_agg_df, wsd_zeo_agg_df = eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
+    #     mmd_zeo_osda_df, wsd_zeo_osda_df = eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
 
     # #### Single diffusion model evaluation + Vary cond_scale ####
     # for cond_scale in [0.25, 0.5, 0.75, 1, 1.25, 1.5]:
@@ -577,7 +625,12 @@ if __name__ == '__main__':
     #### Multiple diffusion model evaluation + Vary cond_scales ####
     model_type = 'diff'
     split = 'system'
-    for fname in ['v0-ts100', 'v0-ts2000']:
+    for fname in [
+                  'v0_lr4e-5_b16', 'v0_lr1e-4_b16', 'v0_lr4e-4_b16', 'v0_lr1e-3_b16',
+                  'v0_lr4e-5_b32', 'v0_lr1e-4_b32', 'v0_lr4e-4_b32', 'v0_lr1e-3_b32',
+                  'v0_lr4e-5_b64', 'v0_lr1e-4_b64', 'v0_lr4e-4_b64', 'v0_lr1e-3_b64',
+                  'v0_lr4e-5_b128', 'v0_lr1e-4_b128', 'v0_lr4e-4_b128', 'v0_lr1e-3_b128',
+                  ]:
         for cond_scale in [0.75, 1]:
             model, configs = load_model(model_type, fname, split)
             syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs, cond_scale=cond_scale)

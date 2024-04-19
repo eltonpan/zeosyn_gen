@@ -332,6 +332,67 @@ def abs_error(x, y):
 
     return ae_dict
 
+def coverage(pred_df, true_df):
+    '''
+    Returns dictionary of coverages (precision & recall) for each feature. eg. {'precision': {'Si/Al': 0.9, 'Si/Ge': 0.8, ...},
+                                                                               'recall'   : {'Si/Al': 0.6, 'Si/Ge': 0.7, ...},
+                                                                               }
+    '''
+    assert isinstance(pred_df, pd.DataFrame) and isinstance(true_df, pd.DataFrame), 'inputs need to be pandas dataframes'
+
+    prec_dict = {}
+    rec_dict = {}
+    for col in pred_df.columns:
+        # Filter out infinite values for Si/Al, Al/P, Si/Ge, Si/B
+        if col == 'Si/Al':
+            pred, true = pred_df[col], true_df[col]
+            thres = 1.5
+        elif col == 'Al/P':
+            pred, true = pred_df[col], true_df[col]
+            thres = 0.05
+        elif col == 'Si/Ge':
+            pred, true = pred_df[col], true_df[col]
+            thres = 0.05
+        elif col == 'Si/B':
+            pred, true = pred_df[col], true_df[col]
+            thres = 0.05
+        elif col in ['Na/T', 'K/T', 'OH/T', 'F/T', 'sda1/T']:
+            pred, true = pred_df[col], true_df[col]
+            thres = 0.05
+        elif col == 'H2O/T':
+            pred, true = pred_df[col], true_df[col]
+            thres = 5.
+        elif col == 'cryst_temp':
+            pred, true = pred_df[col], true_df[col]
+            thres = 5.
+        elif col == 'cryst_time':
+            pred, true = pred_df[col], true_df[col]
+            thres = 12.
+
+        # Precision: % of predicted synthesis being high quality
+        if len(pred) > 200:
+            pred = pred.sample(200, random_state=0)
+        
+        count = 0
+        for p in pred: # for each true value
+            if np.abs(true - p).min() < thres:
+                count += 1
+        prec = count/len(pred)
+
+        # Recall: % of true synthesis being correctly predicted
+        count = 0
+        for t in true: # for each true value
+            if np.abs(pred - t).min() < thres:
+                count += 1
+        rec = count/len(true)
+
+        prec_dict[col] = prec
+        rec_dict[col] = rec
+
+    cov_dict = {'precision': prec_dict, 'recall': rec_dict}
+
+    return cov_dict
+
 if os.path.basename(os.getcwd()) == 'data': 
     os.chdir('..') # switch back to main directory after all
 
