@@ -9,14 +9,16 @@ import json
 import data.utils as utils
 sys.modules['utils'] = utils # Way to get around relative imports in utils for ZeoSynGen_dataset # https://stackoverflow.com/questions/2121874/python-pickling-after-changing-a-modules-directory
 from einops import repeat
-from models.cvae import CVAEv1, CVAEv2
+from models.cvae import CVAEv1, CVAEv2, CVAE_EQ
 from models.gan import Generator
 from models.nf import ConditionalNormalizingFlow
 from models.bnn import BayesLinear
 from models.diffusion import *
 from models.nn import NN
+from torch_geometric.loader import DataLoader
 from data.metrics import maximum_mean_discrepancy, wasserstein_distance, abs_error, coverage
 from sklearn.metrics import r2_score
+import tqdm
 import pdb
 
 def load_model(model_type, fname, split, load_step=None):
@@ -36,6 +38,12 @@ def load_model(model_type, fname, split, load_step=None):
     if model_type == 'cvae':
         # model = CVAEv1(**configs['model_params'])
         model = CVAEv2(**configs['model_params'])
+        model.load_state_dict(torch.load(f'runs/{model_type}/{split}/{fname}/best_model.pt', map_location=configs['device']))
+        model = model.to(configs['device'])
+        model.eval()
+
+    if model_type == 'cvae-eq':
+        model = CVAE_EQ(**configs['model_params'])
         model.load_state_dict(torch.load(f'runs/{model_type}/{split}/{fname}/best_model.pt', map_location=configs['device']))
         model = model.to(configs['device'])
         model.eval()
@@ -130,9 +138,12 @@ def get_prediction_and_ground_truths(model, configs, cond_scale=None):
     _, _, test_dataset = dataset.train_val_test_split(mode=configs['split'], both_graph_feat_present=True, random_state=0) # Note, here we filter out points with no graph/feature present for either zeolite and OSDA
 
     # Get test zeolites and OSDAs
-    zeo_code, zeo, osda_smiles, osda, = test_dataset[3], test_dataset[5], test_dataset[13], test_dataset[15],
+    if 'eq' in configs['model_type']:
+        zeo_code, zeo, osda_smiles, osda, = test_dataset[3], test_dataset[4], test_dataset[13], test_dataset[15]
+    else:
+        zeo_code, zeo, osda_smiles, osda, = test_dataset[3], test_dataset[5], test_dataset[13], test_dataset[15]
 
-    if configs['model_type'] in ['cvae', 'gan', 'nf', 'bnn', 'gmm', 'nn', 'random', 'amd']: # prediction csv filename
+    if configs['model_type'] in ['cvae', 'cvae-eq', 'gan', 'nf', 'bnn', 'gmm', 'nn', 'random', 'amd']: # prediction csv filename
         pred_fname = "syn_pred_agg.csv"
     elif configs['model_type'] == 'diff':
         assert cond_scale != None, 'cond_scale must be provided for diffusion model'
@@ -150,6 +161,22 @@ def get_prediction_and_ground_truths(model, configs, cond_scale=None):
             osda = repeat(osda, 'n d -> (repeat n) d', repeat=50)
             zeo, osda = zeo.to(configs['device']), osda.to(configs['device'])
             syn_pred = torch.tensor(model.predict(zeo, osda).cpu().detach().numpy())
+
+        elif configs['model_type'] == 'cvae-eq':
+            assert cond_scale == None, 'cond_scale must not be provided for CVAE model'
+            # Batch inference of graphs
+            zeo_code = repeat(np.array(zeo_code), 'n -> (repeat n)', repeat=50)
+            zeo = zeo*50
+            osda_smiles = repeat(np.array(osda_smiles), 'n -> (repeat n)', repeat=50)
+            osda = repeat(osda, 'n d -> (repeat n) d', repeat=50)
+
+            dl = DataLoader(list(zip(zeo, osda)), batch_size=2048, shuffle=False) # use dataloader to batch graphs
+            syn_pred_list = []
+            for (zeo, osda) in tqdm.tqdm(dl):
+                zeo, osda = zeo.to(configs['device']), osda.to(configs['device'])
+                syn_pred = torch.tensor(model.predict(zeo, osda).cpu().detach().numpy())
+                syn_pred_list.append(syn_pred)
+            syn_pred = torch.cat(syn_pred_list, dim=0).cpu().detach().numpy()
         
         elif configs['model_type'] == 'gan':
             assert cond_scale == None, 'cond_scale must not be provided for CVAE model'
@@ -635,7 +662,7 @@ if __name__ == '__main__':
     #### Single model evaluation ####
     for model_type, fname, split in [
                                     # ('random', 'v0', 'system'),
-                                    ('amd', 'v0', 'system'),
+                                    # ('amd', 'v0', 'system'),
                                     # ('nn', 'v0', 'system'),
                                     # ('bnn', 'v0', 'system'),
                                     # ('gmm', 'v0', 'system'),
@@ -643,6 +670,7 @@ if __name__ == '__main__':
                                     # ('nf', 'v0', 'system'),
                                     # ('cvae', 'v10', 'system'),
                                     # ('diff', 'v3', 'system'),
+                                    ('cvae-eq', 'v3', 'system'),
                                     ]:
         model, configs = load_model(model_type, fname, split)
         syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs)
@@ -658,10 +686,7 @@ if __name__ == '__main__':
     # model_type = 'diff'
     # split = 'system'
     # for fname in [
-    #               'v0_lr4e-5_b16', 'v0_lr1e-4_b16', 'v0_lr4e-4_b16', 'v0_lr1e-3_b16',
-    #               'v0_lr4e-5_b32', 'v0_lr1e-4_b32', 'v0_lr4e-4_b32', 'v0_lr1e-3_b32',
-    #               'v0_lr4e-5_b64', 'v0_lr1e-4_b64', 'v0_lr4e-4_b64', 'v0_lr1e-3_b64',
-    #               'v0_lr4e-5_b128', 'v0_lr1e-4_b128', 'v0_lr4e-4_b128', 'v0_lr1e-3_b128',
+    #               'v0_lr4e-4_b1024', 'v0_lr1e-3_b1024',
     #               ]:
     #     for cond_scale in [0.75, 1]:
     #         model, configs = load_model(model_type, fname, split)
