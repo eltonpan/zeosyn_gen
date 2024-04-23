@@ -38,4 +38,4 @@
 - `data/utils.py`: Helper functions for data preprocessing and visualization
 
 
-
+Note: The `cde` environment is required to run training and inference of Gausssian mixture models (gmm).
