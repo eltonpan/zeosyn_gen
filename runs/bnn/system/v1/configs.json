@@ -1,0 +1,13 @@
+{
+    "model_type": "bnn",
+    "split": "system",
+    "fname": "v1",
+    "device": "cuda:0",
+    "batch_size": 8192,
+    "n_epochs": 10000,
+    "lr": 0.0001,
+    "model_params": {
+        "prior_mu": 0,
+        "prior_sigma": 0.1
+    }
+}
