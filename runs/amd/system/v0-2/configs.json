@@ -1,0 +1,16 @@
+{
+    "model_type": "amd",
+    "split": "system",
+    "fname": "v0-2",
+    "device": "cuda:3",
+    "batch_size": 4096,
+    "n_epochs": 5000,
+    "lr": 0.0001,
+    "model_params": {
+        "zeo_h_dims": 64,
+        "osda_h_dims": 64,
+        "syn_dims": 12,
+        "zeo_feat_dims": 253,
+        "osda_feat_dims": 14
+    }
+}
