@@ -1,0 +1,21 @@
+{
+    "model_type": "cvae-gnn",
+    "split": "system",
+    "fname": "v3",
+    "device": "cuda:2",
+    "beta": 0.01,
+    "batch_size": 2048,
+    "n_epochs": 30000,
+    "lr": 4e-05,
+    "model_params": {
+        "z_dims": 2,
+        "zeo_h_dims": 64,
+        "osda_h_dims": 64,
+        "syn_dims": 12,
+        "n_node_feats": 2,
+        "n_hidden": 128,
+        "p_drop": 0.2,
+        "n_heads": 1,
+        "pool_method": "mean"
+    }
+}
