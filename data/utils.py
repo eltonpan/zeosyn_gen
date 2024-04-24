@@ -590,7 +590,7 @@ def plot_gel_conds(x_syn_ratio, label=None):
     plt.legend()
     plt.show()
 
-def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, common_norm=False, alpha=1.):
+def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, common_norm=False, alpha=1., xlims={}):
     '''
     Args:
         x_syn_ratios: (List of pd.DataFrames) with columns of synthesis conditions. Each DataFrame should be have shape [n_datapoints, n_gel_comp + n_reaction_cond]
@@ -598,7 +598,10 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
         plot_kde (List of bools): whether to plot kde of distribution
         plot_bar (List of bools): whether to plot bars of histogram
         common_norm: Bool. for two plots to have the same normalized area.
-        
+        xlims: Dict. User-defined x-axis limits for each column eg. {
+                                                                     'Si/Al': {'min': 0, 'max': 400}, 
+                                                                     'Al/P':  {'min': 0, 'max': 1.8},
+                                                                     }
     '''
     assert len(x_syn_ratios) == len(labels), 'Number of DataFrames must be equal to number of legend labels.'
 
@@ -623,33 +626,36 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
         ax = fig.add_subplot(1, len(col_names), col_idx)
 
         # Define x-axis limits
-        col_max = max([x_syn_ratio[col_name].max() for x_syn_ratio in x_syn_ratios])
-        col_min = min([x_syn_ratio[col_name].min() for x_syn_ratio in x_syn_ratios])
+        if col_name in xlims.keys(): # user-defined bounds
+            col_min, col_max = xlims[col_name]['min'], xlims[col_name]['max']
+        else:
+            col_max = max([x_syn_ratio[col_name].max() for x_syn_ratio in x_syn_ratios])
+            col_min = min([x_syn_ratio[col_name].min() for x_syn_ratio in x_syn_ratios])
 
-        if col_max-col_min == 0.: # If col_max == col_min, use user-defined right bound (KDE plot requires non-zero range)
-            if col_name == 'Si/Al':
-                col_max = 400.00000000000006
-            elif col_name == 'Al/P':
-                col_max = 1.7179967159277212
-            elif col_name == 'Si/Ge':
-                col_max = 98.9999999999999
-            elif col_name == 'Si/B':
-                col_max = 250.00000000000003
-            elif col_name == 'Na/T':
-                col_max = 1.920999102706711
-            elif col_name == 'K/T':
-                col_max = 5.333333333333333
-            elif col_name == 'OH/T':
-                col_max = 2.4341677246909406
-            elif col_name == 'F/T':
-                col_max = 1.25
-            elif col_name == 'H2O/T':
-                col_max = 200.00000000000006
-            elif col_name == 'sda1/T':
-                col_max = 6.097582682238018
-            else:
-                assert False, f"the column name {col_name} does not have user-defined bounds in the case of col_range == 0.0 for plt.xlim()"
-        col_range = col_max-col_min
+            if col_max-col_min == 0.: # If col_max == col_min, use user-defined right bound (KDE plot requires non-zero range)
+                if col_name == 'Si/Al':
+                    col_max = 400.00000000000006
+                elif col_name == 'Al/P':
+                    col_max = 1.7179967159277212
+                elif col_name == 'Si/Ge':
+                    col_max = 98.9999999999999
+                elif col_name == 'Si/B':
+                    col_max = 250.00000000000003
+                elif col_name == 'Na/T':
+                    col_max = 1.920999102706711
+                elif col_name == 'K/T':
+                    col_max = 5.333333333333333
+                elif col_name == 'OH/T':
+                    col_max = 2.4341677246909406
+                elif col_name == 'F/T':
+                    col_max = 1.25
+                elif col_name == 'H2O/T':
+                    col_max = 200.00000000000006
+                elif col_name == 'sda1/T':
+                    col_max = 6.097582682238018
+                else:
+                    assert False, f"the column name {col_name} does not have user-defined bounds in the case of col_range == 0.0 for plt.xlim()"
+            col_range = col_max-col_min
 
         for x_syn_ratio, label, color, kde, bar in zip(x_syn_ratios, labels, colors, plot_kde, plot_bar):
             assert kde or bar, f'At least one of kde or bar must be True for data labeled {label}'
