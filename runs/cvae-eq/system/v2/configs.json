@@ -1,0 +1,21 @@
+{
+    "model_type": "cvae-eq",
+    "split": "system",
+    "fname": "v2",
+    "device": "cuda:0",
+    "beta": 0.01,
+    "batch_size": 2048,
+    "n_epochs": 5000,
+    "lr": 0.0001,
+    "model_params": {
+        "z_dims": 2,
+        "zeo_h_dims": 64,
+        "osda_h_dims": 64,
+        "syn_dims": 12,
+        "osda_feat_dims": 14,
+        "lmax": 2,
+        "n_layers": 1,
+        "num_neighbors": 9.714,
+        "num_nodes": 138.2
+    }
+}
