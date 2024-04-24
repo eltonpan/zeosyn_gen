@@ -1,0 +1,11 @@
+{
+    "model_type": "gmm",
+    "split": "system",
+    "fname": "v0-3",
+    "model_params": {
+        "n_centers": 50,
+        "syn_dims": 12,
+        "zeo_feat_dims": 143,
+        "osda_feat_dims": 14
+    }
+}
