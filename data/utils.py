@@ -590,7 +590,7 @@ def plot_gel_conds(x_syn_ratio, label=None):
     plt.legend()
     plt.show()
 
-def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, common_norm=False, alpha=1., xlims={}):
+def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, common_norm=False, alpha=1., xlims={}, save_path=None):
     '''
     Args:
         x_syn_ratios: (List of pd.DataFrames) with columns of synthesis conditions. Each DataFrame should be have shape [n_datapoints, n_gel_comp + n_reaction_cond]
@@ -615,7 +615,12 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
 
     col_names = [c for c in x_syn_ratios[0].columns if c not in  ['zeo', 'osda']]
 
-    fig = plt.figure(figsize=(6/3*len(col_names),3), dpi = 100)
+    if save_path is not None:
+        dpi = 300
+    else:
+        dpi = 100
+
+    fig = plt.figure(figsize=(6/3*len(col_names),3), dpi=dpi)
     col_idx = 1
     if colors == None:
         colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink']
@@ -655,7 +660,7 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
                     col_max = 6.097582682238018
                 else:
                     assert False, f"the column name {col_name} does not have user-defined bounds in the case of col_range == 0.0 for plt.xlim()"
-            col_range = col_max-col_min
+        col_range = col_max-col_min
 
         for x_syn_ratio, label, color, kde, bar in zip(x_syn_ratios, labels, colors, plot_kde, plot_bar):
             assert kde or bar, f'At least one of kde or bar must be True for data labeled {label}'
@@ -727,6 +732,10 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
 
     plt.legend()
     plt.show()
+
+    if save_path is not None:
+        fig.savefig(save_path, bbox_inches='tight')
+        print(f'Figure saved at {save_path}')
 
 def visualize_smiles(smiles_list):
     '''Visualize SMILES strings of molecules.
