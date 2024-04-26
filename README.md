@@ -15,6 +15,7 @@
 - `notebooks/visualize_pred_X.ipynb`: Visualizations of model X predictions
 - `notebooks/compare_cvae_v9_v10.ipynb`: Qualitative validation of MMD/WSD metrics by comparing CVAE predictions (from models v9 and v10) to grouth truth
 - `notebooks/tune_diff_hyperparams.ipynb`: Investigation of the effect cond_drop_prob and cond_scale on diffusion performance
+- `notebooks/dendrogram.ipynb`: plot dendrogram of zeolites
 
 ## Assets
 
@@ -23,6 +24,7 @@
 - `data/zeo2graph.pkl`: Dict mapping zeolite IZA code to graph
 - `data/smiles2graph.pkl`: Dict mapping OSDA SMILES to graph
 - `data/zeolite_descriptors.csv`: Zeolite physicochemical descriptors
+- `data/zeolite_descriptors_for_dendro.csv`: Zeolite physicochemical descriptors + some extra info (ring sizes, CBUs etc) for dendrogram plotting
 - `data/zeolite_binding_energy.csv`: Zeolite binding energies to literature OSDAs
 - `data/zeolite_graph_distance.csv`: Zeolite graph and SOAP distances to one another
 - `data/CVAE_EGNN_embeddings_2023-07-13.csv`: EGNN embeddings of zeolites obtained from pretraining CVAE-EGNN on synthesis task
