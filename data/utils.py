@@ -614,7 +614,7 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
     fontsize = 15
 
     col_names = [c for c in x_syn_ratios[0].columns if c not in  ['zeo', 'osda']]
-    col2name = {'Si/Al': 'Si/Al', 'Al/P': 'Al/P', 'Si/Ge': 'Si/Ge', 'Si/B': 'Si/B', 'Na/T': 'Na/T', 'K/T': 'K/T', 'OH/T': 'OH/T', 'F/T': 'F/T', 'H2O/T': 'H$_2$O/T', 'sda1/T': 'SDA/T', 'cryst_temp': 'Cryst. temp\n($\circ$C)', 'cryst_time': 'Cryst. time\n(h)'}
+    col2name = {'Si/Al': 'Si/Al', 'Al/P': 'Al/P', 'Si/Ge': 'Si/Ge', 'Si/B': 'Si/B', 'Na/T': 'Na/T', 'K/T': 'K/T', 'OH/T': 'OH/T', 'F/T': 'F/T', 'H2O/T': 'H$_2$O/T', 'sda1/T': 'SDA/T', 'cryst_temp': 'Cryst. temp\n(^$\circ$C)', 'cryst_time': 'Cryst. time\n(h)'}
 
     if save_path is not None:
         dpi = 300
