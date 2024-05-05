@@ -15,12 +15,12 @@ from models.cvae import CVAE_GNN
 configs = { 
             'model_type' : 'cvae-gnn',
             'split' : 'system',
-            'fname': 'v0',
-            'device' : 'cuda:1',
+            'fname': 'v3',
+            'device' : 'cuda:2',
             'beta' : 1e-2, # optimal 1e-2,
-            'batch_size' : 1024,
-            'n_epochs' : 5000,
-            'lr' : 1e-4,
+            'batch_size' : 2048,
+            'n_epochs' : 30000,
+            'lr' : 4e-5,
             'model_params':{
                         'z_dims': 2,
                         'zeo_h_dims': 64, 
@@ -28,13 +28,13 @@ configs = {
                         'syn_dims': 12, 
                         'n_node_feats': 2,
                         'n_hidden': 128,
-                        'p_drop': 0.0,
-                        'n_heads': 3,
+                        'p_drop': 0.2,
+                        'n_heads': 1,
                         'pool_method': 'mean',
                         },
             }
 
-def train_cvae(model, configs):
+def train_cvae_gnn(model, configs):
 
     # Create run folder
     assert os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}") == False, 'Name already taken. Please choose another folder name.'
@@ -149,4 +149,4 @@ def train_cvae(model, configs):
 
 if __name__ == "__main__":
     model = CVAE_GNN(**configs['model_params'])
-    train_cvae(model, configs)
+    train_cvae_gnn(model, configs)
