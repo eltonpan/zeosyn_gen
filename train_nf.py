@@ -17,7 +17,7 @@ from torch.distributions import Normal
 configs = { 
             'model_type' : 'nf',
             'split' : 'system',
-            'fname': 'v0',
+            'fname': 'v0-3',
             'device' : 'cuda:0',
             'batch_size' : 2048,
             'n_epochs' : 3000, # 2e4
