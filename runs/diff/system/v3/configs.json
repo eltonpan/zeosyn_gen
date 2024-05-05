@@ -2,7 +2,7 @@
     "model_type": "diff",
     "split": "system",
     "fname": "v3",
-    "device": "cuda:2",
+    "device": "cuda:1",
     "train_batch_size": 32,
     "train_lr": 0.0004,
     "train_num_steps": 1000000.0,
