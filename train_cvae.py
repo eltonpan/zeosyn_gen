@@ -15,7 +15,7 @@ from models.cvae import CVAEv1, CVAEv2
 configs = { 
             'model_type' : 'cvae',
             'split' : 'system',
-            'fname': 'v15',
+            'fname': 'v10-3',
             'device' : 'cuda:3',
             'beta' : 1e-2, # optimal 1e-2,
             'batch_size' : 2048,
