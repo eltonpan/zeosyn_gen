@@ -1,0 +1,33 @@
+{
+    "model_type": "diff",
+    "split": "system",
+    "fname": "v0_lr4e-4_b16",
+    "device": "cuda:2",
+    "train_batch_size": 16,
+    "train_lr": 0.0004,
+    "train_num_steps": 100000.0,
+    "gradient_accumulate_every": 2,
+    "ema_decay": 0.99,
+    "amp": false,
+    "lr_decay": false,
+    "lr_decay_gamma": 0.99999,
+    "save_all_model_checkpoints": false,
+    "model_params": {
+        "dim": 12,
+        "dim_mults": [
+            32,
+            64,
+            128
+        ],
+        "channels": 1,
+        "resnet_block_groups": 4,
+        "cond_drop_prob": 0.05,
+        "seq_length": 12,
+        "timesteps": 100,
+        "zeo_feat_dims": 143,
+        "osda_feat_dims": 14,
+        "zeo_h_dims": 64,
+        "osda_h_dims": 64,
+        "dropout": false
+    }
+}
