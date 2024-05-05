@@ -17,7 +17,7 @@ from models.nn import NN
 configs = { 
             'model_type' : 'amd',
             'split' : 'system',
-            'fname': 'v0',
+            'fname': 'v0-3',
             'device' : 'cuda:3',
             'batch_size' : 4096,
             'n_epochs' : 5000,
@@ -33,9 +33,9 @@ configs = {
 
 def train_nn(model, configs):
 
-    # # Create run folder
-    # assert os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}") == False, 'Name already taken. Please choose another folder name.'
-    # os.mkdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}")
+    # Create run folder
+    assert os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}") == False, 'Name already taken. Please choose another folder name.'
+    os.mkdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}")
 
     # Save configs
     with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/configs.json", "w") as outfile:
