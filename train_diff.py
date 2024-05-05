@@ -10,25 +10,25 @@ import pdb
 configs = {
             "model_type" : "diff",
             "split" : "system",
-            "fname": "v0-ts2000",
-            "device" : "cuda:2",
-            "train_batch_size": 32,
-            "train_lr": 4e-4,
-            "train_num_steps": 1e5, # 1e6
-            "gradient_accumulate_every": 2,
-            "ema_decay": 0.99,
+            "fname": "v6",
+            "device" : "cuda:3",
+            "train_batch_size": 128, # optimal 128
+            "train_lr": 4e-4, # optimal 4e-4
+            "train_num_steps": 1e6, # optimal 1e6
+            "gradient_accumulate_every": 2, # optimal 2
+            "ema_decay": 0.9, # optimal 0.9
             "amp": False,
             "lr_decay": False,
             "lr_decay_gamma": 0.99999,
-            "save_all_model_checkpoints": False,
+            "save_all_model_checkpoints": True,
             "model_params":{
                             "dim": 12,
-                            "dim_mults": (32, 64, 128),
+                            "dim_mults": (64, 128, 256), # optimal (64, 128, 256)
                             "channels": 1,
                             "resnet_block_groups": 4,
-                            "cond_drop_prob": 0.05, 
+                            "cond_drop_prob": 0.10, # optimal 0.10
                             "seq_length": 12,
-                            "timesteps": 1000,
+                            "timesteps": 100, # optimal 100
                             "zeo_feat_dims": 143, 
                             "osda_feat_dims": 14,
                             "zeo_h_dims": 64, 
