@@ -590,7 +590,7 @@ def plot_gel_conds(x_syn_ratio, label=None):
     plt.legend()
     plt.show()
 
-def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, common_norm=False, alpha=1., xlims={}, save_path=None):
+def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, common_norm=False, alpha=1., xlims={}, bw_adjusts={}, save_path=None):
     '''
     Args:
         x_syn_ratios: (List of pd.DataFrames) with columns of synthesis conditions. Each DataFrame should be have shape [n_datapoints, n_gel_comp + n_reaction_cond]
@@ -601,7 +601,11 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
         xlims: Dict. User-defined x-axis limits for each column eg. {
                                                                      'Si/Al': {'min': 0, 'max': 400}, 
                                                                      'Al/P':  {'min': 0, 'max': 1.8},
-                                                                     }
+                                                                     } 
+        bw_adjusts: Dict. User-defined bandwidth adjustment for each column eg. {
+                                                                                'Si/Al': 0.1,
+                                                                                'Al/P': 1,
+                                                                                }
     '''
     assert len(x_syn_ratios) == len(labels), 'Number of DataFrames must be equal to number of legend labels.'
 
@@ -663,22 +667,27 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
                     assert False, f"the column name {col_name} does not have user-defined bounds in the case of col_range == 0.0 for plt.xlim()"
         col_range = col_max-col_min
 
+        if col_name in bw_adjusts.keys(): # user-defined bandwidth adjustment
+            bw_adjust = bw_adjusts[col_name]
+        else:
+            bw_adjust = 1 # default
+
         for x_syn_ratio, label, color, kde, bar in zip(x_syn_ratios, labels, colors, plot_kde, plot_bar):
             assert kde or bar, f'At least one of kde or bar must be True for data labeled {label}'
             
             if kde and bar: # plot both kde and bar
                 if x_syn_ratio.loc[:,col_name].var() == 0.0: # Zero variance, add noise to allow KDE plot to work
                     noised_ratio = x_syn_ratio.loc[:,col_name]+np.abs(0.01*col_range*np.random.randn(len(x_syn_ratio.loc[:,col_name]))) # add small amount of noise (sigma = 0.01*col_range) to allow KDE plot to work
-                    sns.histplot(noised_ratio, label=label, kde=True, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
+                    sns.histplot(noised_ratio, label=label, kde=True, kde_kws={'clip':[col_min, col_max], 'cut':100, 'bw_adjust':bw_adjust}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
                 else:
-                    sns.histplot(x_syn_ratio[col_name], label=label, kde=True, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
+                    sns.histplot(x_syn_ratio[col_name], label=label, kde=True, kde_kws={'clip':[col_min, col_max], 'cut':100, 'bw_adjust':bw_adjust}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
             
             elif kde: # plot only kde
                 if x_syn_ratio.loc[:,col_name].var() == 0.0: # Zero variance, add noise to allow KDE plot to work
                     noised_ratio = x_syn_ratio.loc[:,col_name]+np.abs(0.01*col_range*np.random.randn(len(x_syn_ratio.loc[:,col_name]))) # add small amount of noise (sigma = 0.01*col_range) to allow KDE plot to work
-                    sns.kdeplot(noised_ratio, label=label, clip=[col_min, col_max], cut=100, color=color, alpha=alpha, linewidth=2, fill=True)
+                    sns.kdeplot(noised_ratio, label=label, clip=[col_min, col_max], cut=100, bw_adjust=bw_adjust, color=color, alpha=alpha, linewidth=2, fill=True)
                 else:
-                    sns.kdeplot(x_syn_ratio[col_name], label=label, clip=[col_min, col_max], cut=100, color=color, alpha=alpha, linewidth=2, fill=True)
+                    sns.kdeplot(x_syn_ratio[col_name], label=label, clip=[col_min, col_max], cut=100, bw_adjust=bw_adjust, color=color, alpha=alpha, linewidth=2, fill=True)
             
             elif bar: # plot only bar
                 sns.histplot(x_syn_ratio[col_name], label=label, bins=20, binrange=[col_min, col_max], color = color, stat=stat, alpha=alpha)
