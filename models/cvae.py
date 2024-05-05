@@ -225,7 +225,7 @@ class EGNN(torch.nn.Module):
         return output
     
 class CVAE_EQ(nn.Module):
-    def __init__(self, z_dims=64, zeo_h_dims=64, osda_h_dims=64, syn_dims=12, lmax=2, n_layers=1, num_neighbors=9.714, num_nodes=138.2):
+    def __init__(self, z_dims=64, zeo_h_dims=64, osda_feat_dims=14, osda_h_dims=64, syn_dims=12, lmax=2, n_layers=1, num_neighbors=9.714, num_nodes=138.2):
         super().__init__()
         self.z_dims   = z_dims
         self.zeo_h_dims = zeo_h_dims
