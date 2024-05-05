@@ -17,10 +17,10 @@ from torch.autograd import Variable
 configs = { 
             'model_type' : 'gan',
             'split' : 'system',
-            'fname': 'v6',
+            'fname': 'v3-3',
             'device' : 'cuda:1',
             'batch_size' : 2048,
-            'n_epochs' : 3200, # 2e4
+            'n_epochs' : 400, # 2e4
             'lr' : 1e-4,
             'model_params':{
                         'z_dims': 10,
