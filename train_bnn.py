@@ -16,14 +16,14 @@ import pdb
 configs = { 
             'model_type' : 'bnn',
             'split' : 'system',
-            'fname': 'v0',
+            'fname': 'v3',
             'device' : 'cuda:0',
             'batch_size' : 8192,
             'n_epochs' : 10000, 
             'lr' : 1e-4,
             'model_params':{
                           'prior_mu': 0,
-                          'prior_sigma': 0.1,
+                          'prior_sigma': 0.3,
                         },
             }
 
@@ -54,7 +54,7 @@ def train_bnn(model, configs):
 
     optimizer = optim.Adam(model.parameters(), lr=configs['lr'])
 
-    kl_weight = 0.1
+    # kl_weight = 0.1
 
     model.to(configs['device'])
 
