@@ -15,11 +15,11 @@ from models.cvae import CVAE_EQ
 configs = { 
             'model_type' : 'cvae-eq',
             'split' : 'system',
-            'fname': 'v3',
+            'fname': 'v4',
             'device' : 'cuda:2',
             'beta' : 1e-2, # optimal 1e-2,
             'batch_size' : 2048,
-            'n_epochs' : 5000,
+            'n_epochs' : 50000,
             'lr' : 1e-4,
             'model_params':{
                         'z_dims': 2,
@@ -34,7 +34,7 @@ configs = {
                         },
             }
 
-def train_cvae(model, configs):
+def train_cvae_eq(model, configs):
 
     # Create run folder
     assert os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}") == False, 'Name already taken. Please choose another folder name.'
@@ -149,4 +149,4 @@ def train_cvae(model, configs):
 
 if __name__ == "__main__":
     model = CVAE_EQ(**configs['model_params'])
-    train_cvae(model, configs)
+    train_cvae_eq(model, configs)
