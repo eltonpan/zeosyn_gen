@@ -13,7 +13,7 @@ import pdb
 configs = { 
             'model_type' : 'gmm',
             'split' : 'system',
-            'fname': 'v0',
+            'fname': 'v0-3',
             'model_params':{
                         'n_centers': 50,
                         'syn_dims': 12, 
