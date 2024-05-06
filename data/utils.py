@@ -590,7 +590,7 @@ def plot_gel_conds(x_syn_ratio, label=None):
     plt.legend()
     plt.show()
 
-def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, common_norm=False, alpha=1., xlims={}, bw_adjusts={}, non_zeros=[], linewidth=2., save_path=None):
+def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, common_norm=False, alpha=1., n_rows=1, xlims={}, bw_adjusts={}, non_zeros=[], linewidth=2., save_path=None):
     '''
     Args:
         x_syn_ratios: (List of pd.DataFrames) with columns of synthesis conditions. Each DataFrame should be have shape [n_datapoints, n_gel_comp + n_reaction_cond]
@@ -598,6 +598,7 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
         plot_kde (List of bools): whether to plot kde of distribution
         plot_bar (List of bools): whether to plot bars of histogram
         common_norm: Bool. for two plots to have the same normalized area.
+        n_rows: Int. Number of rows for the subplots
         xlims: Dict. User-defined x-axis limits for each column eg. {
                                                                      'Si/Al': {'min': 0, 'max': 400}, 
                                                                      'Al/P':  {'min': 0, 'max': 1.8},
@@ -626,8 +627,10 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
         dpi = 300
     else:
         dpi = 100
+    
+    n_cols = int(len(col_names)/n_rows)
 
-    fig = plt.figure(figsize=(6/3*len(col_names),3), dpi=dpi)
+    fig = plt.figure(figsize=(2*n_cols,3*n_rows), dpi=dpi)
     col_idx = 1
     if colors == None:
         colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink']
@@ -635,7 +638,7 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
         assert len(colors) == len(x_syn_ratios), 'Number of colors must be equal to number of DataFrames.'
 
     for col_name in col_names:
-        ax = fig.add_subplot(1, len(col_names), col_idx)
+        ax = fig.add_subplot(n_rows, n_cols, col_idx)
 
         # Define x-axis limits
         if col_name in xlims.keys(): # user-defined bounds
@@ -746,6 +749,8 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
         col_idx += 1
 
     plt.legend()
+    if n_rows > 1:
+        plt.tight_layout()
     plt.show()
 
     if save_path is not None:
