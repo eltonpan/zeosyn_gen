@@ -686,9 +686,9 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
             if kde and bar: # plot both kde and bar
                 if x_syn_ratio.loc[:,col_name].var() == 0.0: # Zero variance, add noise to allow KDE plot to work
                     noised_ratio = x_syn_ratio.loc[:,col_name]+np.abs(0.01*col_range*np.random.randn(len(x_syn_ratio.loc[:,col_name]))) # add small amount of noise (sigma = 0.01*col_range) to allow KDE plot to work
-                    sns.histplot(noised_ratio, label=label, kde=True, kde_kws={'clip':[col_min, col_max], 'cut':100, 'bw_adjust':bw_adjust, 'linewidth':linewidth}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
+                    sns.histplot(noised_ratio, label=label, kde=True, kde_kws={'clip':[col_min, col_max], 'cut':100, 'bw_adjust':bw_adjust}, line_kws={'linewidth':linewidth}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
                 else:
-                    sns.histplot(x_syn_ratio[col_name], label=label, kde=True, kde_kws={'clip':[col_min, col_max], 'cut':100, 'bw_adjust':bw_adjust, 'linewidth':linewidth}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
+                    sns.histplot(x_syn_ratio[col_name], label=label, kde=True, kde_kws={'clip':[col_min, col_max], 'cut':100, 'bw_adjust':bw_adjust}, line_kws={'linewidth':linewidth}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
             
             elif kde: # plot only kde
                 if x_syn_ratio.loc[:,col_name].var() == 0.0: # Zero variance, add noise to allow KDE plot to work
@@ -700,24 +700,16 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
             elif bar: # plot only bar
                 sns.histplot(x_syn_ratio[col_name], label=label, bins=20, binrange=[col_min, col_max], color = color, stat=stat, alpha=alpha)
 
-        # if kde:
-        #     if show_hist: # enable bars
-        #         for x_syn_ratio, label, color in zip(x_syn_ratios, labels, colors):
-        #             sns.histplot(x_syn_ratio[col_name], label=label, kde=kde, kde_kws={'clip':[col_min, col_max], 'cut':100}, bins=20, binrange=[col_min, col_max], color=color, stat=stat, alpha=alpha)
-        #     else: # disable bars
-        #         for x_syn_ratio, label, color in zip(x_syn_ratios, labels, colors):
-        #             sns.kdeplot(x_syn_ratio[col_name], label=label, clip=[col_min, col_max], cut=100, color=color, alpha=alpha, linewidth=2, fill=True)
-
-        # else:
-        #     for x_syn_ratio, label, color in zip(x_syn_ratios, labels, colors):
-        #         sns.histplot(x_syn_ratio[col_name], label=label, bins=20, binrange=[col_min, col_max], color = color, stat=stat, alpha=alpha)
-        
         ax.yaxis.set_tick_params(labelleft=False)
 
-        if col_idx > 1:
-            plt.ylabel('')
-        else:
+        # if col_idx > 1:
+        #     plt.ylabel('')
+        # else:
+        #     plt.ylabel('Density', fontsize=fontsize)
+        if (col_idx-1)%n_cols == 0:
             plt.ylabel('Density', fontsize=fontsize)
+        else:
+            plt.ylabel('')
         
         # Relabel high values to inf in xticks
         high_val = {'Si/Al': 400.000, 'Al/P': 1.717, 'Si/Ge': 98.999, 'Si/B': 250.000} # maps col_name to high value
