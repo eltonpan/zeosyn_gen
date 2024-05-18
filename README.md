@@ -38,6 +38,7 @@
 - `data/get_bash_command_for_distance_grid.py`: script to construct bash script for Zeo++ 
 - `data/syn_variables.py`: Column names of synthesis parameters
 - `data/utils.py`: Helper functions for data preprocessing and visualization
+- `prec_rec/precusors.py`: Dictionary mapping raw text to elemental identity and common names
 
 
 Note: The `cde` environment is required to run training and inference of Gausssian mixture models (gmm).
