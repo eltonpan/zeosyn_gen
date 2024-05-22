@@ -38,7 +38,7 @@
 - `data/get_bash_command_for_distance_grid.py`: script to construct bash script for Zeo++ 
 - `data/syn_variables.py`: Column names of synthesis parameters
 - `data/utils.py`: Helper functions for data preprocessing and visualization
-- `prec_rec/analyze_precs.ipynb`: Create textual outputs into ChatGPT to create `precusors_raw.py`
+- `prec_rec/prepare_prec_dataset.ipynb`: Prepare precursor generation dataset
 - `prec_rec/precusors_raw.py`: Dictionary mapping raw text to elemental identity and common names
 - `prec_rec/precusors_clean.py`: Dictionary mapping raw text to elemental identity and common names (cleaned by Soon 2024-05-08)
 
