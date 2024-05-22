@@ -438,7 +438,7 @@ class ZeoSynGenDataset:
         return self.all_present_idx
 
 
-    def train_val_test_split(self, mode='random', both_graph_feat_present=True, return_idxs=False, random_state=0, year_cutoff=None):
+    def train_val_test_split(self, mode='random', both_graph_feat_present=True, return_idxs=False, random_state=0, year_cutoff=None, return_dataframe=False):
         '''Get datapoint idxs for train/val/test sets
 
         Args:
@@ -447,6 +447,7 @@ class ZeoSynGenDataset:
             return_idxs: Bool. Whether to return idxs. If True, return dataset idxs instead of dataset
             random_state: int. Random state for train_test_split
             year_cutoff: int. Year to split train/val/test sets for temporal split
+            return_dataframe: Bool. Whether to return a dataframe or just tensors
         
         Returns:
             train_dataset, val_dataset, test_dataset (if return_idxs=False)
@@ -467,9 +468,9 @@ class ZeoSynGenDataset:
             self.random_train_idxs, self.random_test_idxs = train_test_split(idxs, test_size=0.2, random_state=random_state)
             self.random_train_idxs, self.random_val_idxs = train_test_split(self.random_train_idxs, test_size=0.125, random_state=random_state)
             
-            self.random_train_dataset = self.get_datapoints_by_index(self.random_train_idxs)
-            self.random_val_dataset = self.get_datapoints_by_index(self.random_val_idxs)
-            self.random_test_dataset = self.get_datapoints_by_index(self.random_test_idxs)
+            self.random_train_dataset = self.get_datapoints_by_index(self.random_train_idxs, return_dataframe=return_dataframe)
+            self.random_val_dataset = self.get_datapoints_by_index(self.random_val_idxs, return_dataframe=return_dataframe)
+            self.random_test_dataset = self.get_datapoints_by_index(self.random_test_idxs, return_dataframe=return_dataframe)
 
             print('n_datapoints:')
             print('train:', len(self.random_train_idxs), 'val:', len(self.random_val_idxs), 'test:', len(self.random_test_idxs))
@@ -510,9 +511,9 @@ class ZeoSynGenDataset:
 
             self.sys_train_idxs, self.sys_val_idxs = train_test_split(self.sys_train_idxs, test_size=0.125, random_state=random_state) # Random train-val split
 
-            self.sys_train_dataset = self.get_datapoints_by_index(self.sys_train_idxs)
-            self.sys_val_dataset = self.get_datapoints_by_index(self.sys_val_idxs)
-            self.sys_test_dataset = self.get_datapoints_by_index(self.sys_test_idxs)
+            self.sys_train_dataset = self.get_datapoints_by_index(self.sys_train_idxs, return_dataframe=return_dataframe)
+            self.sys_val_dataset = self.get_datapoints_by_index(self.sys_val_idxs, return_dataframe=return_dataframe)
+            self.sys_test_dataset = self.get_datapoints_by_index(self.sys_test_idxs, return_dataframe=return_dataframe)
 
             print('n_datapoints:')
             print('train:', len(self.sys_train_idxs), 'val:', len(self.sys_val_idxs), 'test:', len(self.sys_test_idxs))
@@ -539,9 +540,9 @@ class ZeoSynGenDataset:
             self.year_train_idxs, self.year_val_idxs = train_test_split(self.year_train_idxs, test_size=0.125, random_state=random_state)
             self.year_test_idxs = df[df['year'] > year_cutoff].index
 
-            self.year_train_dataset = self.get_datapoints_by_index(self.year_train_idxs)
-            self.year_val_dataset = self.get_datapoints_by_index(self.year_val_idxs)
-            self.year_test_dataset = self.get_datapoints_by_index(self.year_test_idxs)
+            self.year_train_dataset = self.get_datapoints_by_index(self.year_train_idxs, return_dataframe=return_dataframe)
+            self.year_val_dataset = self.get_datapoints_by_index(self.year_val_idxs, return_dataframe=return_dataframe)
+            self.year_test_dataset = self.get_datapoints_by_index(self.year_test_idxs, return_dataframe=return_dataframe)
 
             print('n_datapoints:')
             print('train:', len(self.year_train_idxs), 'val:', len(self.year_val_idxs), 'test:', len(self.year_test_idxs))
