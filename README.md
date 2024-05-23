@@ -41,7 +41,8 @@
 - `prec_rec/prepare_prec_dataset.ipynb`: Prepare precursor generation dataset
 - `prec_rec/precusors_raw.py`: Dictionary mapping raw text to elemental identity and common names
 - `prec_rec/precusors_clean.py`: Dictionary mapping raw text to elemental identity and common names (cleaned by Soon 2024-05-08)
-
-
+- `prec_rec/prec_dataset/prec_dataset_X.csv`: Specific split for precursor generation dataset
+- `prec_rec/prec_dataset/prec_dataset_X.csv`: Specific split for precursor generation dataset
+- `visualize_prec_dataset.ipynb`: Guide on how to access key parts of precursor generation dataset
 
 Note: The `cde` environment is required to run training and inference of Gausssian mixture models (gmm).
