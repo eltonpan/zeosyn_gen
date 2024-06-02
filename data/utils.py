@@ -318,10 +318,6 @@ class ZeoSynGenDataset:
                self.doi[idx], \
                self.idxs[idx], \
                self.is_lit[idx], \
-               
-               
-            #    self.y_zeo3_code[idx], self.y_zeo3_graph[idx], self.y_zeo3_feat[idx], self.y_zeo3_graph_present[idx], self.y_zeo3_feat_present[idx], \
-            #    self.y_osda3_smiles[idx], self.y_osda3_graph[idx], self.y_osda3_feat[idx], self.y_osda3_graph_present[idx], self.y_osda3_feat_present[idx], \
 
     def get_datapoints_by_index(self, dataset_idxs, scaled=True, return_dataframe=False):
         '''
