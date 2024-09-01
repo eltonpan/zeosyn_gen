@@ -16,6 +16,7 @@
 - `notebooks/compare_cvae_v9_v10.ipynb`: Qualitative validation of MMD/WSD metrics by comparing CVAE predictions (from models v9 and v10) to grouth truth
 - `notebooks/tune_diff_hyperparams.ipynb`: Investigation of the effect cond_drop_prob and cond_scale on diffusion performance
 - `notebooks/dendrogram.ipynb`: plot dendrogram of zeolites
+- `notebooks/compare_model_outputs.ipynb`: 2D distribution of synthesis parameters visualization
 
 ## Assets
 
