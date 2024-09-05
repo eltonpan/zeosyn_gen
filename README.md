@@ -17,6 +17,7 @@
 - `notebooks/tune_diff_hyperparams.ipynb`: Investigation of the effect cond_drop_prob and cond_scale on diffusion performance
 - `notebooks/dendrogram.ipynb`: plot dendrogram of zeolites
 - `notebooks/compare_model_outputs.ipynb`: 2D distribution of synthesis parameters visualization
+- `notebooks/villaescusa.ipynb`: H2O/T vs. zeolite framework density plot 
 
 ## Assets
 
