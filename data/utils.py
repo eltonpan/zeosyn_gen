@@ -650,7 +650,7 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
                 elif col_name == 'Al/P':
                     col_max = 1.7179967159277212
                 elif col_name == 'Si/Ge':
-                    col_max = 98.9999999999999
+                    col_max = 99.001
                 elif col_name == 'Si/B':
                     col_max = 250.00000000000003
                 elif col_name == 'Na/T':
@@ -665,6 +665,10 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
                     col_max = 200.00000000000006
                 elif col_name == 'sda1/T':
                     col_max = 6.097582682238018
+                elif col_name == 'cryst_temp':
+                    col_max = col_max*1.01
+                elif col_name == 'cryst_time':
+                    col_max = col_max*1.01
                 else:
                     assert False, f"the column name {col_name} does not have user-defined bounds in the case of col_range == 0.0 for plt.xlim()"
         col_range = col_max-col_min
