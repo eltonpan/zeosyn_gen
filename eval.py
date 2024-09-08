@@ -541,7 +541,10 @@ def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, data
                 print('WSD:', wsd)
 
             if plot:
-                utils.compare_gel_conds([sys_syn_pred, sys_syn_true], ['Predicted', 'True'], [True, False], [False, True], ['tab:orange', 'tab:blue'], common_norm=True, alpha=0.5)
+                try:
+                    utils.compare_gel_conds([sys_syn_pred, sys_syn_true], ['Predicted', 'True'], [True, False], [False, True], ['tab:orange', 'tab:blue'], common_norm=True, alpha=0.5)
+                except Exception as e:
+                    print('ERROR: ', e)
 
             count += 1
             
@@ -661,6 +664,17 @@ def eval_single_system(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dat
 
     if plot:
         utils.compare_gel_conds([sys_syn_pred, sys_syn_true], ['Predicted', 'True'], [True, False], [False, True], ['tab:orange', 'tab:blue'], common_norm=True, alpha=0.5)
+
+def plot_single_system(syn_pred, syn_true, zeo, osda=None):
+    if osda == None: # Zeolite-aggregated
+        print(zeo)
+        sys_syn_pred, sys_syn_true = syn_pred[syn_pred['zeo'] == zeo], syn_true[syn_true['zeo'] == zeo]
+
+    else: # Zeolite-OSDA
+        print(zeo, osda)
+        sys_syn_pred, sys_syn_true = syn_pred[(syn_pred['zeo'] == zeo) & (syn_pred['osda'] == osda)], syn_true[(syn_true['zeo'] == zeo) & (syn_true['osda'] == osda)]
+        
+    utils.compare_gel_conds([sys_syn_pred, sys_syn_true], ['Predicted', 'True'], [True, False], [False, True], ['tab:orange', 'tab:blue'], common_norm=True, alpha=0.5)
 
 def get_metric_dataframes(configs):
     '''
