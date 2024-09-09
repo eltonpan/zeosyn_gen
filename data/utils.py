@@ -784,7 +784,7 @@ def scale_x_syn_ratio(x_syn_ratio, dataset):
     
     return x_syn_ratio_scaled
 
-def plot_ternary(df_true, df_pred, cols, ternary_lim=None, n_bins=200, ternary_min_value=0.1):
+def plot_ternary(df_true, df_pred, cols, ternary_lim=None, n_bins=200, ternary_min_value=0.1, grid_border_frac=1, cmap='viridis'):
     '''Plot ternary phase diagram of true and predicted recipes.
 
     df_true, df_pred: pd.DataFrame with 3 named columns. Does not need to be normalized.
@@ -795,6 +795,7 @@ def plot_ternary(df_true, df_pred, cols, ternary_lim=None, n_bins=200, ternary_m
                                                                                     0.0, 0.5, # bottom
     n_bins: int, number of bins for the heatmap. Default is 200.
     ternary_min_value: float, minimum value for the ternary plot. Default is 0.1.
+    grid_border_frac: float, size of border around the grid, expressed as a fraction of the total grid range
     '''
     _df_true = df_true[cols]
     _df_pred = df_pred[cols]
@@ -815,13 +816,13 @@ def plot_ternary(df_true, df_pred, cols, ternary_lim=None, n_bins=200, ternary_m
         mode="density",
         remove_background=True,
         ternary_min_value=ternary_min_value,
-        grid_border_frac=1,
+        grid_border_frac=grid_border_frac,
     )
 
     fig, ax = plt.subplots(1, 1, figsize=(9, 13.5), dpi=100)
     ax = axes_to_ternary(ax)
 
-    ax[0].tripcolor(*coords.T, H.flatten(), cmap='Oranges', label='Generated')
+    ax[0].tripcolor(*coords.T, H.flatten(), cmap=cmap, label='Generated')
     _df_true.pyroplot.scatter(ax=ax[0], color="white", alpha=1., s=200, marker='o', edgecolors='black', linewidths=1, label='Literature') 
     pyrolite.util.plot.axes.label_axes(ax[0], cols, fontsize=40)
 
