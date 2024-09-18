@@ -15,6 +15,7 @@ import pickle
 import pyrolite
 from pyrolite.plot.density.ternary import ternary_heatmap
 from pyrolite.util.plot.axes import axes_to_ternary
+from pyrolite.comp.codata import ILR, inverse_ILR
 
 def check_nans(df):
     return f'Number of NaNs: {df.isna().sum()}'
@@ -784,7 +785,7 @@ def scale_x_syn_ratio(x_syn_ratio, dataset):
     
     return x_syn_ratio_scaled
 
-def plot_ternary(df_true, df_pred, cols, ternary_lim=None, n_bins=200, ternary_min_value=0.1, grid_border_frac=1, cmap='viridis'):
+def plot_ternary(df_true, df_pred, cols, ternary_lim=None, n_bins=200, ternary_min_value=0.1, grid_border_frac=1, cmap='viridis', markersize=200):
     '''Plot ternary phase diagram of true and predicted recipes.
 
     df_true, df_pred: pd.DataFrame with 3 named columns. Does not need to be normalized.
@@ -823,7 +824,7 @@ def plot_ternary(df_true, df_pred, cols, ternary_lim=None, n_bins=200, ternary_m
     ax = axes_to_ternary(ax)
 
     ax[0].tripcolor(*coords.T, H.flatten(), cmap=cmap, label='Generated')
-    _df_true.pyroplot.scatter(ax=ax[0], color="white", alpha=1., s=200, marker='o', edgecolors='black', linewidths=1, label='Literature') 
+    _df_true.pyroplot.scatter(ax=ax[0], color="white", alpha=1., s=markersize, marker='o', edgecolors='black', linewidths=1, label='Literature') 
     pyrolite.util.plot.axes.label_axes(ax[0], cols, fontsize=40)
 
     # Resize tick labels
@@ -836,4 +837,67 @@ def plot_ternary(df_true, df_pred, cols, ternary_lim=None, n_bins=200, ternary_m
         )
 
     plt.legend(fontsize=20)
+    plt.tight_layout()
+
+def plot_ternary_multiple(df_trues, df_preds, cols, labels, ternary_lim=None, n_bins=200, ternary_min_value=0.1, grid_border_frac=1, cmaps=['Blues', 'Reds'], cmap_alphas=[1., 0.5], markercolors=['white', 'white'], markeralphas=[1., 1.], markersize=200, legend=True):
+    '''Plot ternary phase diagram of multiple overlaid true and predicted recipes.
+
+    df_true, df_pred: List of pd.DataFrames with 3 named columns. Does not need to be normalized.
+    cols: list of 3 strings, column names in df_true and df_pred. This controls the order of the axes.
+    labels: list of strings, labels for the plots.
+    ternary_lim: tuple of 6 floats, limits of the ternary plot. Default is None. E.g.                                        
+                                                                                    0.5, 1.0, # right
+                                                                                    0.0, 0.5, # left
+                                                                                    0.0, 0.5, # bottom
+    n_bins: int, number of bins for the heatmap. Default is 200.
+    ternary_min_value: float, minimum value for the ternary plot. Default is 0.1.
+    grid_border_frac: float, size of border around the grid, expressed as a fraction of the total grid range
+    '''
+    _df_trues = [df_true[cols] for df_true in df_trues]
+    _df_preds = [df_pred[cols] for df_pred in df_preds]
+    
+    # Normalize true
+    for _df_true in _df_trues:
+        norm = _df_true.sum(axis=1)
+        for col in cols:
+            _df_true[col] = _df_true[col] / norm
+
+    # Normalize pred
+    for _df_pred in _df_preds:
+        norm = _df_pred.sum(axis=1)
+        for col in cols:
+            _df_pred[col] = _df_pred[col] / norm
+
+    fig, ax = plt.subplots(1, 1, figsize=(9, 13.5), dpi=100)
+    ax = axes_to_ternary(ax)
+
+    for _df_pred, cmap, cmap_alpha, label in zip(_df_preds, cmaps, cmap_alphas, labels):
+        coords, H, data = ternary_heatmap(
+            _df_pred.values,
+            bins=n_bins,
+            mode="density",
+            remove_background=True,
+            transform=ILR,
+            inverse_transform=inverse_ILR,
+            ternary_min_value=ternary_min_value,
+            grid_border_frac=grid_border_frac,
+        )
+        ax[0].tripcolor(*coords.T, H.flatten(), cmap=cmap, label=f'{label} Generated', alpha=cmap_alpha)
+
+    for _df_true, markercolor, markeralpha, label in zip(_df_trues, markercolors, markeralphas, labels):
+        _df_true.pyroplot.scatter(ax=ax[0], color=markercolor, alpha=markeralpha, s=markersize, marker='o', edgecolors='black', linewidths=1, label=f'{label} Literature') 
+
+    pyrolite.util.plot.axes.label_axes(ax[0], cols, fontsize=40)
+
+    # Resize tick labels
+    for i in ['t', 'r', 'l']:
+        ax[0].tick_params(axis=i, labelsize=30)
+
+    if ternary_lim is not None:
+        ax[0].set_ternary_lim(
+            *ternary_lim
+        )
+
+    if legend:
+        plt.legend(fontsize=20)
     plt.tight_layout()
