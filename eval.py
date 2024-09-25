@@ -130,7 +130,7 @@ def load_model(model_type, fname, split, load_step=None):
 
     return model, configs
 
-def get_prediction_and_ground_truths(model, configs, cond_scale=None):
+def get_prediction_and_ground_truths(model, configs, cond_scale=None, split='test'):
     '''
     Get predicted distributions (and their scaled versions) and ground truth distributions for synthesis conditions
 
@@ -142,19 +142,24 @@ def get_prediction_and_ground_truths(model, configs, cond_scale=None):
     # Load test set
     with open(f'data/ZeoSynGen_dataset.pkl', 'rb') as f: # load dataset
         dataset = pickle.load(f)
-    _, _, test_dataset = dataset.train_val_test_split(mode=configs['split'], both_graph_feat_present=True, random_state=0) # Note, here we filter out points with no graph/feature present for either zeolite and OSDA
+    if split == 'test':
+        _, _, _dataset = dataset.train_val_test_split(mode=configs['split'], both_graph_feat_present=True, random_state=0) # Note, here we filter out points with no graph/feature present for either zeolite and OSDA
+    elif split == 'val':
+        _, _dataset, _ = dataset.train_val_test_split(mode=configs['split'], both_graph_feat_present=True, random_state=0) # Note, here we filter out points with no graph/feature present for either zeolite and OSDA
+    elif split == 'train':
+        _dataset, _, _ = dataset.train_val_test_split(mode=configs['split'], both_graph_feat_present=True, random_state=0) # Note, here we filter out points with no graph/feature present for either zeolite and OSDA
 
     # Get test zeolites and OSDAs
     if configs['model_type'] in ['cvae-eq', 'cvae-gnn']:
-        zeo_code, zeo, osda_smiles, osda, = test_dataset[3], test_dataset[4], test_dataset[13], test_dataset[15]
+        zeo_code, zeo, osda_smiles, osda, = _dataset[3], _dataset[4], _dataset[13], _dataset[15]
     else:
-        zeo_code, zeo, osda_smiles, osda, = test_dataset[3], test_dataset[5], test_dataset[13], test_dataset[15]
+        zeo_code, zeo, osda_smiles, osda, = _dataset[3], _dataset[5], _dataset[13], _dataset[15]
 
     if configs['model_type'] in ['cvae', 'cvae-eq', 'cvae-gnn', 'gan', 'nf', 'bnn', 'gmm', 'nn', 'random', 'amd']: # prediction csv filename
         pred_fname = "syn_pred_agg.csv"
     elif configs['model_type'] == 'diff':
         assert cond_scale != None, 'cond_scale must be provided for diffusion model'
-        pred_fname = f"syn_pred_agg-cond_scale_{cond_scale}.csv"
+        pred_fname = f"syn_pred_agg-cond_scale_{cond_scale}-{split}.csv"
 
     if not os.path.isfile(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/{pred_fname}"): # If synthetic predictions not already saved
         print('Systems not predicted yet, predicting and saving...')
@@ -335,7 +340,7 @@ def get_prediction_and_ground_truths(model, configs, cond_scale=None):
     syn_pred_scaled = utils.scale_x_syn_ratio(syn_pred, dataset) # get min-max scaled version too
 
     # Get ground truth
-    syn_true, zeo_code, osda_smiles = test_dataset[1], test_dataset[3], test_dataset[13]
+    syn_true, zeo_code, osda_smiles = _dataset[1], _dataset[3], _dataset[13]
     for ratio_idx, ratio in enumerate(dataset.ratio_names+dataset.cond_names):
         qt = dataset.qts[ratio] # load quantile transformer
         syn_true[:,ratio_idx] = torch.tensor(qt.inverse_transform(syn_true[:,ratio_idx].reshape(-1, 1))).reshape(-1) # transform back
@@ -735,8 +740,8 @@ if __name__ == '__main__':
     model_type = 'diff'
     split = 'system'
     for fname in [
-                  'v6',
+                  'v3',
                   ]:
-        for cond_scale in [0.75, 1, 1.25]:
+        for cond_scale in [0.75]:
             model, configs = load_model(model_type, fname, split)
-            syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs, cond_scale=cond_scale)
+            syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs, cond_scale=cond_scale, split='val')
