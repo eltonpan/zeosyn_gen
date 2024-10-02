@@ -748,7 +748,6 @@ class GaussianDiffusion1D(nn.Module):
         x_start = None
 
         for t in tqdm(reversed(range(0, self.num_timesteps)), desc = 'sampling loop time step', total = self.num_timesteps):
-            # img, x_start = self.p_sample(img, t, cond, cond_scale)
             img, x_start = self.p_sample(img, t, zeo, osda, cond_scale)
 
         img = unnormalize_to_zero_to_one(img)
