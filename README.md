@@ -19,7 +19,7 @@
 - `notebooks/compare_model_outputs.ipynb`: 2D distribution of synthesis parameters visualization
 - `notebooks/villaescusa.ipynb`: H2O/T vs. zeolite framework density plot (Villaescusa's Rule)
 - `notebooks/temp_vs_fwd.ipynb`: Crystallization temperature distributions vs. zeolite framework density plot 
-
+- `notebooks/2024-10-01_OSDAs_to_featurize.ipynb`: Visualize K222 and CHA OSDAs before featurization
 - `notebooks/get_k222_and_CHA_osdas_features.ipynb`: Extract OSDA features from `data/241002_k222_etc_mols_osda_priors_0.pkl` and saves preprocessed features as `data/2024-10-02_K222_and_CHA_OSDA_features.csv`
 
 ## Assets
