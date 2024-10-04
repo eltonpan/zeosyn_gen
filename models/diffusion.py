@@ -53,6 +53,7 @@ from functools import partial
 import copy
 import logging
 import pdb
+import pandas as pd
 
 from torch.optim.lr_scheduler import ExponentialLR
 
@@ -484,7 +485,9 @@ class Unet1D(nn.Module):
         # cond,
         zeo,
         osda,
-        cond_drop_prob = None
+        cond_drop_prob = None,
+        save_zeo_emb = False,
+        save_osda_emb = False,
     ):
         batch, device = x.shape[0], x.device
 
@@ -492,7 +495,13 @@ class Unet1D(nn.Module):
 
         # derive condition, with condition dropout for classifier free guidance        
         zeo_emb = self.zeo_mlp(zeo)
+        if save_zeo_emb:
+            pd.DataFrame(zeo_emb.detach().cpu().numpy()).to_csv('data/zeo_enc_emb.csv')
+            print('saved zeo_emb')
         osda_emb = self.osda_mlp(osda)
+        if save_osda_emb:
+            pd.DataFrame(osda_emb.detach().cpu().numpy()).to_csv('data/osda_enc_emb.csv')
+            print('saved osda_emb')
         cond_emb = torch.cat([zeo_emb, osda_emb], dim = -1)  # Concatenate zeolite and osda embeddings
 
         if cond_drop_prob > 0:
