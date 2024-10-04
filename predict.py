@@ -12,7 +12,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Zeolite and OSDA
-zeo, osda = 'CHA', 'C[N+](C)(C)C12CC3CC(CC(C3)C1)C2'
+zeo, osda = 'UFI', 'C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2'
 
 # Set model parameters
 model_type = 'diff'
@@ -29,7 +29,9 @@ if __name__ == '__main__':
 
     # Load zeolite and OSDA descriptors
     df_zeo = pd.read_csv('data/zeolite_descriptors.csv').drop(columns = ['Unnamed: 0'])
-    df_osda = pd.read_csv('data/osda_descriptors.csv').drop(columns = ['Unnamed: 0'])
+    # df_osda = pd.read_csv('data/osda_descriptors.csv').drop(columns = ['Unnamed: 0'])
+    df_osda = pd.read_csv('data/2024-10-02_K222_and_CHA_OSDA_features.csv').drop(columns = ['Unnamed: 0'])
+
     df_zeo = df_zeo[['Code']+zeo_cols]
     df_osda = df_osda[['osda smiles']+[col for col in osda_cols.keys()]]
 
@@ -40,7 +42,6 @@ if __name__ == '__main__':
 
     zeo_feat = np.array(df_zeo[df_zeo['Code'] == zeo][zeo_cols])
     osda_feat = np.array(df_osda[df_osda['osda smiles'] == osda][list(osda_cols.keys())])
-
     # print(zeo_feat)
     # print(osda_feat)
 

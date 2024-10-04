@@ -20,6 +20,8 @@
 - `notebooks/villaescusa.ipynb`: H2O/T vs. zeolite framework density plot (Villaescusa's Rule)
 - `notebooks/temp_vs_fwd.ipynb`: Crystallization temperature distributions vs. zeolite framework density plot 
 
+- `notebooks/get_k222_and_CHA_osdas_features.ipynb`: Extract OSDA features from `data/241002_k222_etc_mols_osda_priors_0.pkl` and saves preprocessed features as `data/2024-10-02_K222_and_CHA_OSDA_features.csv`
+
 ## Assets
 
 **Data**
@@ -35,6 +37,8 @@
 - `data/osda_descriptors.csv`: OSDA physicochemical descriptors
 - `data/iza_codes.py`: List of IZA codes
 - `data/zeolite_amd_distance_matrix.csv`: AMD distance matrix featurization of zeolite topologies as reported in Schwalbe-Koda et al (2023) https://github.com/dskoda/Zeolites-AMD/blob/main/data/iza_dm.csv
+- `data/241002_k222_etc_mols_osda_priors_0.pkl`: Features of K222 and CHA OSDAs (from Science paper)
+- `data/2024-10-02_K222_and_CHA_OSDA_features.csv`: Preprocessed K222 version of `data/241002_k222_etc_mols_osda_priors_0.pkl`
 
 **Others**
 - `data/get_dummy_graph.py`: Get placeholder graphs for amorphous phases and zeolites with no CIF files
