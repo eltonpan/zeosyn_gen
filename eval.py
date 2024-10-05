@@ -495,7 +495,7 @@ def eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled
     else:
         pass
 
-def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs, eval=True, plot=False, print_metrics=False, num_systems=None):
+def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs, eval=True, plot=False, print_metrics=False, num_systems=None, return_f1=False):
     '''
     Calculate and save evaluation metrics for zeolite-OSDA systems
 
@@ -626,7 +626,10 @@ def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, data
             with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/wsd_zeo_osda.json", "w") as outfile:
                 json.dump({'WSD mean': wsd_mean, 'WSD std': wsd_std}, outfile, indent=4)
 
-        return mmd_zeo_osda_df, wsd_zeo_osda_df
+        if return_f1:
+            return mmd_zeo_osda_df, wsd_zeo_osda_df, prec_zeo_osda_df_mean, rec_zeo_osda_df_mean, f1_zeo_osda_df_mean
+        else:
+            return mmd_zeo_osda_df, wsd_zeo_osda_df
 
     else:
         pass

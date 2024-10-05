@@ -749,17 +749,25 @@ class GaussianDiffusion1D(nn.Module):
         return pred_img, x_start
 
     @torch.no_grad()
-    def p_sample_loop(self, zeo, osda, shape, cond_scale = 3.): 
+    def p_sample_loop(self, zeo, osda, shape, cond_scale=3., save_trajectory=False): 
         batch, device = shape[0], self.betas.device
 
         img = torch.randn(shape, device=device)
 
         x_start = None
 
+        traj = []
+
         for t in tqdm(reversed(range(0, self.num_timesteps)), desc = 'sampling loop time step', total = self.num_timesteps):
             img, x_start = self.p_sample(img, t, zeo, osda, cond_scale)
 
+            if save_trajectory: # Return intermediate states
+                with open(f'data/diffusion_trajectory/t{t}.pkl', 'wb') as file:
+                    pickle.dump(unnormalize_to_zero_to_one(img).detach().cpu().numpy()  , file)    
+                print(f'saved data/diffusion_trajectory/t{t}.pkl')
+
         img = unnormalize_to_zero_to_one(img)
+
         return img
 
     @torch.no_grad()
@@ -796,10 +804,10 @@ class GaussianDiffusion1D(nn.Module):
         return img
 
     @torch.no_grad()
-    def sample(self, zeo, osda, cond_scale = 3., batch_size = 16):
+    def sample(self, zeo, osda, cond_scale=3., batch_size=16, save_trajectory=False):
         seq_length, channels = self.seq_length, self.channels
         sample_fn = self.p_sample_loop if not self.is_ddim_sampling else self.ddim_sample
-        return sample_fn(zeo, osda, (batch_size, channels, seq_length), cond_scale)
+        return sample_fn(zeo, osda, (batch_size, channels, seq_length), cond_scale, save_trajectory)
 
     @torch.no_grad()
     def interpolate(self, x1, x2, t = None, lam = 0.5):
