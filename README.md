@@ -12,6 +12,9 @@
 - `data/augmentation.ipynb`: Visualize and analyze `data/ZeoSynGen_dataset.pkl` for augmentation purposes
 - `train_X.py`: Train X model
 - `eval.py`: Evaluate model(s)
+- `predict.py`: Run synthesis parameter prediction on a specific zeolite-OSDA pair
+- `get_diffusion_trajectory.py`: Generate and save diffusion trajectory
+- `get_metrics_vs_t.py`: Calculate metrics over diffusion trajectory
 - `notebooks/visualize_pred_X.ipynb`: Visualizations of model X predictions
 - `notebooks/compare_cvae_v9_v10.ipynb`: Qualitative validation of MMD/WSD metrics by comparing CVAE predictions (from models v9 and v10) to grouth truth
 - `notebooks/tune_diff_hyperparams.ipynb`: Investigation of the effect cond_drop_prob and cond_scale on diffusion performance
@@ -21,6 +24,7 @@
 - `notebooks/temp_vs_fwd.ipynb`: Crystallization temperature distributions vs. zeolite framework density plot 
 - `notebooks/2024-10-01_OSDAs_to_featurize.ipynb`: Visualize K222 and CHA OSDAs before featurization
 - `notebooks/get_k222_and_CHA_osdas_features.ipynb`: Extract OSDA features from `data/241002_k222_etc_mols_osda_priors_0.pkl` and saves preprocessed features as `data/2024-10-02_K222_and_CHA_OSDA_features.csv`
+- `notebooks/metrics_vs_across_hp.ipynb`: Visualize metrics w.r.t. hyperparameters (t, cond_scale, p_uncond)
 
 ## Assets
 
