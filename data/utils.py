@@ -751,7 +751,7 @@ def compare_gel_conds(x_syn_ratios, labels, plot_kde, plot_bar, colors=None, com
     plt.show()
 
     if save_path is not None:
-        fig.savefig(save_path, bbox_inches='tight')
+        fig.savefig(save_path, dpi=200, bbox_inches='tight')
         print(f'Figure saved at {save_path}')
 
 def visualize_smiles(smiles_list):
