@@ -839,7 +839,7 @@ def plot_ternary(df_true, df_pred, cols, ternary_lim=None, n_bins=200, ternary_m
     plt.legend(fontsize=20)
     plt.tight_layout()
 
-def plot_ternary_multiple(df_trues, df_preds, cols, labels, ternary_lim=None, n_bins=200, ternary_min_value=0.1, grid_border_frac=1, cmaps=['Blues', 'Reds'], cmap_alphas=[1., 0.5], markercolors=['white', 'white'], markeralphas=[1., 1.], markersize=200, legend=True, grid=False):
+def plot_ternary_multiple(df_trues, df_preds, cols, labels, ternary_lim=None, n_bins=200, ternary_min_value=0.1, grid_border_frac=1, cmaps=['Blues', 'Reds'], cmap_alphas=[1., 0.5], markercolors=['white', 'white'], markeralphas=[1., 1.], markersize=200, legend=True, grid=False, save_path=None):
     '''Plot ternary phase diagram of multiple overlaid true and predicted recipes.
 
     df_true, df_pred: List of pd.DataFrames with 3 named columns. Does not need to be normalized.
@@ -903,4 +903,8 @@ def plot_ternary_multiple(df_trues, df_preds, cols, labels, ternary_lim=None, n_
 
     if legend:
         plt.legend(fontsize=20)
+
     plt.tight_layout()
+    
+    if save_path is not None:
+        plt.savefig(save_path, dpi=200, bbox_inches='tight')
