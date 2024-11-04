@@ -1,4 +1,4 @@
-# Chemically-Guided Generative Diffusion Model Enables Zeolite Synthesis Planning
+# DiffSyn: A Chemically-Guided Generative Diffusion Approach for Zeolite Synthesis Planning
 
 <p align="center">
 <img src="/figs/denoising_diffusion.gif" width="200" />
