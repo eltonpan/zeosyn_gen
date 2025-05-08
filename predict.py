@@ -20,8 +20,7 @@ fname = 'v3'
 cond_scale = 0.75
 split = 'system'
 
-if __name__ == '__main__':
-
+def predict(zeo, osda, model_type, fname, cond_scale, split):
     assert os.path.isdir(f"predictions/{zeo}_{osda}") == False, 'Prediction already exists.'
 
     # Load model
@@ -81,3 +80,7 @@ if __name__ == '__main__':
     os.mkdir(f"predictions/{zeo}_{osda}")
     syn_pred.to_csv(f'predictions/{zeo}_{osda}/syn_pred.csv', index=False)
     print(f"Predictions saved to predictions/{zeo}_{osda}/syn_pred.csv")
+
+
+if __name__ == '__main__':
+    predict(zeo, osda, model_type, fname, cond_scale, split)
