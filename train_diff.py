@@ -10,8 +10,8 @@ import pdb
 configs = {
             "model_type" : "diff",
             "split" : "system",
-            "fname": "v6",
-            "device" : "cuda:3",
+            "fname": "test",
+            "device" : "cuda:0",
             "train_batch_size": 128, # optimal 128
             "train_lr": 4e-4, # optimal 4e-4
             "train_num_steps": 1e6, # optimal 1e6
