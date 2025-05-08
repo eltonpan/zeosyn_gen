@@ -12,7 +12,7 @@
 
 To check your CUDA version, run `nvcc --version`.
 
-**Note:** If your CUDA version is earlier than 11.3, you will have to change <YOUR_CUDA_VERSION> to an earlier version for the following lines in `requirements.txt`:
+**Note:** If your CUDA version is earlier than 11.3, you will have to change <YOUR_CUDA_VERSION> to an earlier version for the following lines in `env/requirements.txt`:
 - --extra-index-url https://download.pytorch.org/whl/cu<YOUR_CUDA_VERSION>
 - --find-links     https://data.pyg.org/whl/torch-1.12.1+cu<YOUR_CUDA_VERSION>.html
 - torch==1.12.1+cu<YOUR_CUDA_VERSION>
@@ -32,7 +32,7 @@ All experiments (training, sampling and evaluation) are performed on a NVIDIA RT
 
 3. Install dependencies
 
-`pip install -r requirements.txt`
+`pip install -r env/requirements.txt`
 
 3. Enable conda environment for jupyter notebook
 
@@ -63,7 +63,7 @@ Configurations are defined in `predict.py`. Here, we generate synthesis recipes 
 Note: Generating 1000 synthesis routes takes ~2 min.
 
 ### 2. Visualizing generated synthesis recipes
-Results can be visualized in `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/compare_pred_and_true.ipynb`.
+Results can be visualized in `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/compare_pred_and_true.ipynb` (Fig. 5a and 5e of the manuscript).
 
 ## Model training and evaluation
 
@@ -85,6 +85,138 @@ This evaluates the trained model via a 2-step process: First, we generate synthe
 
 ### Baselines models
 Baseline models can be trained by running the corresponding `train_<MODEL_NAME>.py` and evaluated by changing the configs in `eval.py`.
+
+## Repo tree
+```
+├── cde
+│   ├── BaseConditionalDensity.py
+│   ├── density_estimator
+│   ├── density_simulation
+│   ├── evaluation
+│   ├── __init__.py
+│   ├── model_fitting
+│   ├── __pycache__
+│   └── utils
+├── data
+│   ├── 2024-10-02_K222_and_CHA_OSDA_features.csv
+│   ├── 241002_k222_etc_mols_osda_priors_0.pkl
+│   ├── augmentation.ipynb
+│   ├── cbus-to_be_deleted.csv
+│   ├── cifs
+│   ├── CVAE_EGNN_embeddings_2023-07-13.csv
+│   ├── diffusion_trajectory
+│   ├── get_bash_command_for_distance_grid.py
+│   ├── get_dummy_graph.py
+│   ├── get_zeo_graphs.ipynb
+│   ├── gpt4_generated_dict.py
+│   ├── iza_codes.py
+│   ├── metrics.py
+│   ├── osda_descriptors.csv
+│   ├── osda_enc_emb.csv
+│   ├── prec_rec_vs_hp
+│   ├── process_zeosyn.ipynb
+│   ├── __pycache__
+│   ├── qt
+│   ├── scalers
+│   ├── smiles2graph.pkl
+│   ├── syn_variables.py
+│   ├── utils.py
+│   ├── zeo2graph.pkl
+│   ├── zeo_enc_emb.csv
+│   ├── zeolite_amd_distance_matrix.csv
+│   ├── zeolite_binding_energy.csv
+│   ├── zeolite_descriptors.csv
+│   ├── zeolite_descriptors_for_dendro.csv
+│   ├── zeolite_graph_distance.csv
+│   ├── zeo_osda_sim-syn_cos_sim.csv
+│   ├── zeo_osda_sim-syn_cos_sim-zeo_egnn.csv
+│   ├── zeo_osda_sim-syn_mmd_dissim.csv
+│   ├── ZEOSYN-2.xlsx
+│   ├── ZeoSynGen_dataset.pkl
+│   └── ZEOSYN.xlsx
+├── env
+│   ├── cde.yml
+│   ├── zeo_diffusion_metrics_eq.yml
+│   ├── zeo_diffusion_metrics.yml
+│   └── zeo_diffusion.yml
+├── eval.py
+├── figs
+├── get_diffusion_trajectory.py
+├── get_metrics_vs_t.py
+├── LICENSE
+├── models
+│   ├── bnn.py
+│   ├── cvae.py
+│   ├── diffusion.py
+│   ├── gan.py
+│   ├── nf.py
+│   ├── nn.py
+│   └── __pycache__
+├── notebooks
+│   ├── 2024-10-01_OSDAs_to_featurize.ipynb
+│   ├── compare_cvae_diff.ipynb
+│   ├── compare_cvae_v9_v10.ipynb
+│   ├── compare_model_metrics.ipynb
+│   ├── compare_model_outputs.ipynb
+│   ├── CP-CS1_FAU_LTA.ipynb
+│   ├── CS1_MTT_C[N+](C)(C)CCCCCCC[N+](C)(C)C.ipynb
+│   ├── CS2_MWW_CCCCCCC[N+](C)(C)C.ipynb
+│   ├── CS3_BEC_C[N+](C)(C)CCCCCC[N+](C)(C)C.ipynb
+│   ├── CS4_ITG_C[N+]1(C)CCC([N+]2(C)CCCC2)CC1.ipynb
+│   ├── CS5_IWR.ipynb
+│   ├── CS6_ATO.ipynb
+│   ├── dendrogram.ipynb
+│   ├── dendrogram_learned_embeds.ipynb
+│   ├── get_k222_and_CHA_osdas_features.ipynb
+│   ├── get_osda_embeddings.ipynb
+│   ├── get_zeolite_embeddings.ipynb
+│   ├── metrics_vs_across_hp.ipynb
+│   ├── OPT-CS1_CHA.ipynb
+│   ├── temp_vs_fwd.ipynb
+│   ├── tune_diff_hyperparams.ipynb
+│   ├── villaescusa.ipynb
+│   ├── visualize_pred_amd.ipynb
+│   ├── visualize_pred_bnn.ipynb
+│   ├── visualize_pred_cvae-eq.ipynb
+│   ├── visualize_pred_cvae-gnn.ipynb
+│   ├── visualize_pred_cvae.ipynb
+│   ├── visualize_pred_diff.ipynb
+│   ├── visualize_pred_gan.ipynb
+│   ├── visualize_pred_gmm.ipynb
+│   ├── visualize_pred_nf.ipynb
+│   ├── visualize_pred_nn.ipynb
+│   └── visualize_pred_random.ipynb
+├── predictions
+│   ├── UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2
+├── predict.py
+├── README.md
+├── requirements.txt
+├── results
+├── runs
+│   ├── amd
+│   ├── bnn
+│   ├── cvae
+│   ├── cvae-eq
+│   ├── cvae-gnn
+│   ├── diff
+│   ├── gan
+│   ├── gmm
+│   ├── nf
+│   ├── nn
+│   └── random
+├── splits
+│   └── split_dataset.ipynb
+├── train_amd.py
+├── train_bnn.py
+├── train_cvae-eq.py
+├── train_cvae-gnn.py
+├── train_cvae.py
+├── train_diff.py
+├── train_gan.py
+├── train_gmm.py
+├── train_nf.py
+└── train_nn.py
+```
 
 ## Glossary of all files in the repo
 
