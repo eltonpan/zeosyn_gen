@@ -32,23 +32,21 @@ Install dependencies
 `pip install -r requirements.txt`
 
 Make conda environment visible to a jupyter notebook
-`conda install -c anaconda ipykernel`
-`python -m ipykernel install --user --name=zsg`
+`conda install -c anaconda ipykernel; python -m ipykernel install --user --name=zsg`
 
 ## Demo
 
+We demonstrate the DiffSyn model for prediction synthesis recipes for UFI zeolite (Fig. 5 of the manuscript).
+
 ### 1. Generating new synthesis routes using DiffSyn for a specific system
 Create run folder called `run1` and download trained model weights
-`mkdir runs/diff/system/run1`
-`cd runs/diff/system/run1`
-`wget...`
-`cd ../../..`
+`mkdir runs/diff/system/run1; cd runs/diff/system/run1; wget...; cd ../../..`
 
 To run inference using DiffSyn, run `python predict.py`. Configurations are defined in `predict.py`. Here, we generate synthesis recipes for the UFI zeolite with C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2 as the OSDA. This will automatically create a run directory at `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2`.
 Note: Generating 1000 synthesis routes takes ~2 min.
 
 ### 2. Visualizing generated synthesis recipes
-Results can be visualized in `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/compare_pred_and_true.ipynb`
+Results can be visualized in `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/compare_pred_and_true.ipynb`.
 
 ## Model training and evaluation
 
@@ -60,6 +58,9 @@ Note: Training will takes ~1 week. We recommend you download the model weights f
 ### 2. Evaluation
 To evaluate run `python eval.py`.
 This evaluates the trained model via a 2-step process: First, we generate synthesis recipes for every test system and save it at `runs/diff/system/run1/syn_pred_agg-cond_scale_0.75-test.csv`. Second, we compute metrics, Wasserstein distance and MAE, of the model and save them at `runs/diff/system/run1/wsd_zeo_osda.json` and `runs/diff/system/run1/reg_zeo_osda.json`, respectively.
+
+### Baselines models
+Baseline models can be trained by running the corresponding `train_<MODEL_NAME>.py` and evaluated by changing the configs in `eval.py`.
 
 ## Glossary of all files in the repo
 
@@ -105,7 +106,7 @@ This evaluates the trained model via a 2-step process: First, we generate synthe
 - `data/syn_variables.py`: Column names of synthesis parameters
 - `data/utils.py`: Helper functions for data preprocessing and visualization
 
-**Precursor generation (for future work)**
+**Archive: Precursor generation (for future work)**
 - `prec_rec/prepare_prec_dataset.ipynb`: Prepare precursor generation dataset
 - `prec_rec/precusors_raw.py`: Dictionary mapping raw text to elemental identity and common names
 - `prec_rec/precusors_clean.py`: Dictionary mapping raw text to elemental identity and common names (cleaned by Soon 2024-05-08)
