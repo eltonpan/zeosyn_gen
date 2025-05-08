@@ -48,9 +48,6 @@ def predict(zeo, osda, model_type, fname, cond_scale, split):
     zeo_feat_scaled = torch.tensor(zeo_scaler.transform(zeo_feat), dtype=torch.float32)
     osda_feat_scaled = torch.tensor(osda_scaler.transform(osda_feat), dtype=torch.float32)
 
-    # print(zeo_feat_scaled)
-    # print(osda_feat_scaled)
-
     if configs['model_type'] == 'diff':
         n_samples = 1000
         zeo_feat_scaled, osda_feat_scaled = repeat(zeo_feat_scaled, 'n d -> (repeat n) d', repeat=n_samples), repeat(osda_feat_scaled, 'n d -> (repeat n) d', repeat=n_samples)
