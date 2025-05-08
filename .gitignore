@@ -14,3 +14,6 @@ runs/bnn/**/best_model.pt
 *.out
 __pycache__
 **/__pycache__
+predictions/CHA_**
+predictions/LTA_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2
+predictions/RHO_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2
