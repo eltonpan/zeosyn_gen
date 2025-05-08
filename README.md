@@ -55,7 +55,11 @@ wget...
 cd ../../..
 ```
 
-To run inference using DiffSyn, run `python predict.py`. Configurations are defined in `predict.py`. Here, we generate synthesis recipes for the UFI zeolite with C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2 as the OSDA. This will automatically create a run directory at `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2`.
+To run inference using DiffSyn, run 
+
+`python predict.py`
+
+Configurations are defined in `predict.py`. Here, we generate synthesis recipes for the UFI zeolite with C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2 as the OSDA. This will automatically create a run directory at `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2`.
 Note: Generating 1000 synthesis routes takes ~2 min.
 
 ### 2. Visualizing generated synthesis recipes
@@ -64,12 +68,19 @@ Results can be visualized in `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/c
 ## Model training and evaluation
 
 ### 1. Training
-To train DiffSyn, run `python train_diff.py`. Training configurations are defined in `train_diff.py`. For example, the name of the run is defined as `"fname": "run1"` This will automatically create a run directory in `runs/diff/system/run1`. If you run into OOM errors, please lower `batch_size` in the corresponding config files for each task.
+To train DiffSyn, run 
+
+`python train_diff.py`
+
+Training configurations are defined in `train_diff.py`. For example, the name of the run is defined as `"fname": "run1"` This will automatically create a run directory in `runs/diff/system/run1`. If you run into OOM errors, please lower `batch_size` in the corresponding config files for each task.
 
 Note: Training will takes ~1 week. We recommend you download the model weights from .....
 
 ### 2. Evaluation
-To evaluate run `python eval.py`.
+To evaluate the DiffSyn model, run
+
+`python eval.py`
+
 This evaluates the trained model via a 2-step process: First, we generate synthesis recipes for every test system and save it at `runs/diff/system/run1/syn_pred_agg-cond_scale_0.75-test.csv`. Second, we compute metrics, Wasserstein distance and MAE, of the model and save them at `runs/diff/system/run1/wsd_zeo_osda.json` and `runs/diff/system/run1/reg_zeo_osda.json`, respectively.
 
 ### Baselines models
