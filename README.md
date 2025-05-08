@@ -41,7 +41,12 @@ We demonstrate the DiffSyn model for prediction synthesis recipes for UFI zeolit
 ### 1. Generating new synthesis routes using DiffSyn for a specific system
 Create run folder called `run1` and download trained model weights
 
-`mkdir runs/diff/system/run1; cd runs/diff/system/run1; wget...; cd ../../..`
+```
+mkdir runs/diff/system/run1
+cd runs/diff/system/run1
+wget...
+cd ../../..
+```
 
 To run inference using DiffSyn, run `python predict.py`. Configurations are defined in `predict.py`. Here, we generate synthesis recipes for the UFI zeolite with C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2 as the OSDA. This will automatically create a run directory at `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2`.
 Note: Generating 1000 synthesis routes takes ~2 min.
