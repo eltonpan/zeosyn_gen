@@ -23,16 +23,23 @@ All experiments (training, sampling and evaluation) are performed on a NVIDIA RT
 
 ## Installation guide
 Create environment
+
 `conda create -n zsg python=3.10.4`
 
 Activate environment
+
 `conda activate zsg`
 
 Install dependencies
+
 `pip install -r requirements.txt`
 
 Make conda environment visible to a jupyter notebook
-`conda install -c anaconda ipykernel; python -m ipykernel install --user --name=zsg`
+
+```
+conda install -c anaconda ipykernel
+python -m ipykernel install --user --name=zsg
+```
 
 ## Demo
 
