@@ -89,14 +89,6 @@ Baseline models can be trained by running the corresponding `train_<MODEL_NAME>.
 ## Repo tree
 ```
 ├── cde
-│   ├── BaseConditionalDensity.py
-│   ├── density_estimator
-│   ├── density_simulation
-│   ├── evaluation
-│   ├── __init__.py
-│   ├── model_fitting
-│   ├── __pycache__
-│   └── utils
 ├── data
 │   ├── 2024-10-02_K222_and_CHA_OSDA_features.csv
 │   ├── 241002_k222_etc_mols_osda_priors_0.pkl
@@ -115,7 +107,6 @@ Baseline models can be trained by running the corresponding `train_<MODEL_NAME>.
 │   ├── osda_enc_emb.csv
 │   ├── prec_rec_vs_hp
 │   ├── process_zeosyn.ipynb
-│   ├── __pycache__
 │   ├── qt
 │   ├── scalers
 │   ├── smiles2graph.pkl
@@ -136,6 +127,7 @@ Baseline models can be trained by running the corresponding `train_<MODEL_NAME>.
 │   └── ZEOSYN.xlsx
 ├── env
 │   ├── cde.yml
+│   ├── requirements.txt
 │   ├── zeo_diffusion_metrics_eq.yml
 │   ├── zeo_diffusion_metrics.yml
 │   └── zeo_diffusion.yml
@@ -151,7 +143,6 @@ Baseline models can be trained by running the corresponding `train_<MODEL_NAME>.
 │   ├── gan.py
 │   ├── nf.py
 │   ├── nn.py
-│   └── __pycache__
 ├── notebooks
 │   ├── 2024-10-01_OSDAs_to_featurize.ipynb
 │   ├── compare_cvae_diff.ipynb
