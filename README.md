@@ -84,7 +84,7 @@ To evaluate the DiffSyn model, run
 
 `python eval.py`
 
-This evaluates the trained model via a 2-step process: First, we generate synthesis recipes for every test system and save it at `runs/diff/system/run1/syn_pred_agg-cond_scale_0.75-test.csv`. This takes ~40 min. Second, we compute metrics, Wasserstein distance and MAE, of the model and save them at `runs/diff/system/run1/wsd_zeo_osda.json` and `runs/diff/system/run1/reg_zeo_osda.json`, respectively.
+This evaluates the trained model via a 2-step process: First, we generate synthesis recipes for every test system and save it at `runs/diff/system/run1/syn_pred_agg-cond_scale_0.75-test.csv`. This takes ~200 min. Second, we compute metrics, Wasserstein distance and MAE, of the model and save them at `runs/diff/system/run1/wsd_zeo_osda.json` and `runs/diff/system/run1/reg_zeo_osda.json`, respectively.
 
 ### Baselines models
 Baseline models can be trained by running the corresponding `train_<MODEL_NAME>.py` and evaluated by changing the configs in `eval.py`.
