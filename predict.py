@@ -52,8 +52,6 @@ def predict(zeo, osda, model_type, fname, cond_scale, split):
         n_samples = 1000
         zeo_feat_scaled, osda_feat_scaled = repeat(zeo_feat_scaled, 'n d -> (repeat n) d', repeat=n_samples), repeat(osda_feat_scaled, 'n d -> (repeat n) d', repeat=n_samples)
         zeo_feat_scaled, osda_feat_scaled = zeo_feat_scaled.to(configs['device']), osda_feat_scaled.to(configs['device'])
-        print(zeo_feat_scaled.shape)
-        print(osda_feat_scaled.shape)
         
         sampled_data = model.sample(batch_size=n_samples, zeo=zeo_feat_scaled, osda=osda_feat_scaled, cond_scale=cond_scale)
         syn_pred = torch.tensor(sampled_data.squeeze().detach().cpu().numpy())
