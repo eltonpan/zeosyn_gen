@@ -22,19 +22,19 @@ To check your CUDA version, run `nvcc --version`.
 All experiments (training, sampling and evaluation) are performed on a NVIDIA RTX A5000 GPU (24GB RAM).
 
 ## Installation guide
-Create environment
+1. Create environment
 
 `conda create -n zsg python=3.10.4`
 
-Activate environment
+2. Activate environment
 
 `conda activate zsg`
 
-Install dependencies
+3. Install dependencies
 
 `pip install -r requirements.txt`
 
-Make conda environment visible to a jupyter notebook
+3. Enable conda environment for jupyter notebook
 
 ```
 conda install -c anaconda ipykernel
