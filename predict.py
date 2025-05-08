@@ -37,12 +37,8 @@ def predict(zeo, osda, model_type, fname, cond_scale, split):
     assert zeo in list(df_zeo['Code']), 'Zeolite features not available.'
     assert osda in list(df_osda['osda smiles']), 'OSDA features not available.'
 
-    # print('osda_cols', [x.split('_mean')[0] if '_mean' in x else x for x in osda_cols.keys()])
-
     zeo_feat = np.array(df_zeo[df_zeo['Code'] == zeo][zeo_cols])
     osda_feat = np.array(df_osda[df_osda['osda smiles'] == osda][list(osda_cols.keys())])
-    # print(zeo_feat)
-    # print(osda_feat)
 
     # Scale features
     with open(f'data/scalers/zeo_feat_scaler.pkl', 'rb') as f: # load scaler
