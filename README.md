@@ -71,7 +71,7 @@ wget -O runs/diff/system/run1/model.pt https://www.dropbox.com/scl/fi/vmf5ag87vs
 
 To run inference using DiffSyn, run 
 
-```
+```bash
 python predict.py
 ```
 
