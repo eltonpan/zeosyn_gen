@@ -41,19 +41,25 @@ All experiments (training, inference and evaluation) are performed on a Rocky Li
 ## Installation guide
 1. Create environment
 
-`conda create -n zsg python=3.10.4`
+```bash
+conda create -n zsg python=3.10.4
+```
 
 2. Activate environment
 
-`conda activate zsg`
+```bash
+conda activate zsg
+```
 
 3. Install dependencies
 
-`pip install -r env/requirements.txt`
+```bash
+pip install -r env/requirements.txt
+```
 
 3. Enable conda environment for jupyter notebook
 
-```
+```bash
 conda install -c anaconda ipykernel
 python -m ipykernel install --user --name=zsg
 ```
@@ -88,7 +94,7 @@ The DiffSyn model is trained on the [ZeoSyn dataset](https://pubs.acs.org/doi/10
 
 To train DiffSyn, run 
 
-```
+```bash
 python train_diff.py
 ```
 
@@ -99,7 +105,7 @@ Note: Training will takes ~50 hours. We recommend you download the model weights
 ### 2. Evaluation
 To evaluate the DiffSyn model, run
 
-```
+```bash
 python eval.py
 ```
 
