@@ -78,7 +78,7 @@ python train_diff.py
 
 Training configurations are defined in `train_diff.py`. For example, the name of the run is defined as `"fname": "run1"` This will automatically create a run directory in `runs/diff/system/run1`. If you run into OOM errors, please lower `batch_size` in the corresponding config files for each task.
 
-Note: Training will takes ~50 hours. We recommend you download the model weights from .....
+Note: Training will takes ~50 hours. We recommend you download the model weights (see instructions under Demo section).
 
 ### 2. Evaluation
 To evaluate the DiffSyn model, run
