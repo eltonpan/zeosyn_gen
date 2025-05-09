@@ -10,7 +10,7 @@ import pdb
 configs = {
             "model_type" : "diff",
             "split" : "system",
-            "fname": "test",
+            "fname": "run1",
             "device" : "cuda:0",
             "train_batch_size": 128, # optimal 128
             "train_lr": 4e-4, # optimal 4e-4
@@ -44,7 +44,7 @@ def train_diff(configs):
     os.environ["CUDA_VISIBLE_DEVICES"]=configs['device'].split(":")[-1]
 
     # Create run folder
-    assert os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}") == False, 'Name already taken. Please choose another folder name.'
+    # assert os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}") == False, 'Name already taken. Please choose another folder name (configs["fname"] in `train_diff.py`).'
     os.mkdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}")
 
     # Save configs
