@@ -395,7 +395,3 @@ def coverage(pred_df, true_df):
 
 if os.path.basename(os.getcwd()) == 'data': 
     os.chdir('..') # switch back to main directory after all
-
-if __name__ == '__main__':
-    # _ = calculate_tanimoto_similarity('CCC[N+](CCC)(CCC)CCC', 'CCC[N+](CCC)(CCC)CCCCCC[N+](CCC)(CCC)CCC')
-    print(get_zeolite_similarity('CHA', 'AEI', feat_type = 'soap'))
