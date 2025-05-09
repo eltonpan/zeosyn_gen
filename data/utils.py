@@ -16,6 +16,7 @@ import pyrolite
 from pyrolite.plot.density.ternary import ternary_heatmap
 from pyrolite.util.plot.axes import axes_to_ternary
 from pyrolite.comp.codata import ILR, inverse_ILR
+import json
 
 def check_nans(df):
     return f'Number of NaNs: {df.isna().sum()}'
@@ -491,7 +492,10 @@ class ZeoSynGenDataset:
 
             df = df.loc[idxs] # Filter out datapoints with no graph/feature present for either zeolite and OSDA
 
-            self.systems = list(df[['zeo', 'osda']].value_counts().index)
+            # self.systems = list(df[['zeo', 'osda']].value_counts().index) ### PANDAS DEGENERACY PROBLEM - tiebreakers in frequency will be in arbitrary order across different environments installed with the same pandas version, hence we load from a JSON to ensure reproducible ordering
+            with open('data/zeo_osda_systems.json') as f: # Ad-hoc solution for pandas degeneracy problem (see line above)
+                self.systems = json.load(f)
+
             self.train_systems, self.test_systems = train_test_split(self.systems, test_size=0.2, random_state=random_state)
 
             print('SYSTEMS:')

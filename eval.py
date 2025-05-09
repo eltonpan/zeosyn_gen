@@ -334,7 +334,7 @@ def get_prediction_and_ground_truths(model, configs, cond_scale=None, split='tes
         syn_pred.to_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/{pred_fname}", index=False)
         
     else:
-        print('Loading synthetic predictions from saved predictions...')
+        print(f"Loading synthetic predictions from saved predictions at runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/{pred_fname}")
         syn_pred = pd.read_csv(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/{pred_fname}")
 
     syn_pred_scaled = utils.scale_x_syn_ratio(syn_pred, dataset) # get min-max scaled version too
@@ -704,20 +704,20 @@ def get_metric_dataframes(configs):
     return mmd_zeo_agg_df, wsd_zeo_agg_df, mmd_zeo_osda_df, wsd_zeo_osda_df
     
 if __name__ == '__main__':
-    #### Single model evaluation ####
-    # for model_type, fname, split in [
-    #                                 # ('random', 'v0', 'system'),
-    #                                 # ('amd', 'v0', 'system'),
-    #                                 # ('nn', 'v0', 'system'),
-    #                                 # ('bnn', 'v2', 'system'),
-    #                                 # ('gmm', 'v0', 'system'),
-    #                                 # ('gan', 'v3-3', 'system'),
-    #                                 # ('nf', 'v0', 'system'),
-    #                                 # ('cvae', 'v10', 'system'),
-    #                                 ('cvae-eq', 'v4', 'system'),
-    #                                 # ('cvae-gnn', 'v3', 'system'),
-    #                                 # ('diff', 'v3', 'system'),
-    #                                 ]:
+    ### Single model evaluation ####
+    for model_type, fname, split in [
+                                    # ('random', 'v0', 'system'),
+                                    # ('amd', 'v0', 'system'),
+                                    # ('nn', 'v0', 'system'),
+                                    # ('bnn', 'v2', 'system'),
+                                    # ('gmm', 'v0', 'system'),
+                                    # ('gan', 'v3-3', 'system'),
+                                    # ('nf', 'v0', 'system'),
+                                    # ('cvae', 'v10', 'system'),
+                                    # ('cvae-eq', 'v4', 'system'),
+                                    # ('cvae-gnn', 'v3', 'system'),
+                                    ('diff', 'run1', 'system'),
+                                    ]:
     # # for model_type, fname, split in [
     #                                 # ('amd', 'v0-2', 'system'),
     #                                 # ('amd', 'v0-3', 'system'),
@@ -734,17 +734,19 @@ if __name__ == '__main__':
     #     # mmd_zeo_agg_df, wsd_zeo_agg_df = eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
     #     mmd_zeo_osda_df, wsd_zeo_osda_df = eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
 
-    # #### Single diffusion model evaluation + Vary cond_scale ####
-    # for cond_scale in [0.25, 0.5, 0.75, 1, 1.25, 1.5]:
-    #     model, configs = load_model(model_type, fname, split)
-    #     syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs, cond_scale=cond_scale)
-
-    #### Multiple diffusion model evaluation + Vary cond_scales ####
-    model_type = 'diff'
-    split = 'system'
-    for fname in [
-                  'v3',
-                  ]:
+        #### Single diffusion model evaluation + Vary cond_scale ####
         for cond_scale in [0.75]:
             model, configs = load_model(model_type, fname, split)
-            syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs, cond_scale=cond_scale, split='val')
+            syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs, cond_scale=cond_scale)
+            mmd_zeo_osda_df, wsd_zeo_osda_df = eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
+
+    # #### Multiple diffusion model evaluation + Vary cond_scales ####
+    # model_type = 'diff'
+    # split = 'system'
+    # for fname in [
+    #               'run1',
+    #               ]:
+    #     for cond_scale in [0.75]:
+    #         model, configs = load_model(model_type, fname, split)
+    #         syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset = get_prediction_and_ground_truths(model, configs, cond_scale=cond_scale)
+    #         mmd_zeo_osda_df, wsd_zeo_osda_df = eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, dataset, configs)
