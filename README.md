@@ -22,7 +22,7 @@ torchvision==0.13.1+cu<YOUR_CUDA_VERSION>
 torchaudio==0.12.1+cu<YOUR_CUDA_VERSION>
 ```
 
-All experiments (training, sampling and evaluation) are performed on a NVIDIA RTX A5000 GPU (24GB RAM).
+All experiments (training, sampling and evaluation) are performed on a Rocky Linux machine with a NVIDIA RTX A5000 GPU (24GB RAM).
 
 ## Installation guide
 1. Create environment
