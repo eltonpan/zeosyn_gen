@@ -26,7 +26,7 @@ Elton Pan†, Soonhyoung Kwon‡, Sulin Liu†, Mingrou Xie‡, Alexander Hoffma
 
 To check your CUDA version, run `nvcc --version`.
 
-**Note:** If your CUDA version is earlier than 11.3, you will have to change <YOUR_CUDA_VERSION> to an earlier version for the following lines in `env/requirements.txt`:
+**Note:** If your CUDA version is earlier than 11.3, you will have to change <YOUR_CUDA_VERSION> to an earlier version for the following lines in [`env/requirements.txt`](env/requirements.txt):
 ```
 --extra-index-url https://download.pytorch.org/whl/cu<YOUR_CUDA_VERSION>
 --find-links     https://data.pyg.org/whl/torch-1.12.1+cu<YOUR_CUDA_VERSION>.html
