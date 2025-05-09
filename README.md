@@ -84,13 +84,15 @@ python -m ipykernel install --user --name=zsg
 We demonstrate the DiffSyn model for prediction synthesis recipes for UFI zeolite (Fig. 5 of the manuscript).
 
 ### 1. Generating new synthesis routes using DiffSyn for a specific system
-Download trained model weights `model.pt` in run folder [`runs/diff/system/run1/`](runs/diff/system/run1)
+To download trained model weights `model.pt`, run:
 
 ```
 wget -O runs/diff/system/run1/model.pt https://www.dropbox.com/scl/fi/vmf5ag87vszlikmlsnlg4/model.pt?rlkey=9p1d2ht0qxr32of0xizsmqxat&st=obgh0a2n&dl=1
 ```
 
-To run inference using DiffSyn, run 
+This saves the `model.pt` in the folder [`runs/diff/system/run1/`](runs/diff/system/run1).
+
+To run inference using DiffSyn, run:
 
 ```bash
 python predict.py
@@ -107,7 +109,7 @@ In the same directory as the above, results can be visualized using [`prediction
 ### 1. Training
 The DiffSyn model is trained on the [ZeoSyn dataset](https://pubs.acs.org/doi/10.1021/acscentsci.3c01615), consisting of 23,961 zeolite synthesis routes with 233 zeolite topologies and 921 organic structure-directing agents. 
 
-To train DiffSyn, run 
+To train DiffSyn, run:
 
 ```bash
 python train_diff.py
@@ -118,7 +120,7 @@ Training configurations are defined in [`train_diff.py`](train_diff.py). For exa
 Note: Training will takes ~50 hours. We recommend you download the model weights (see instructions under Demo section).
 
 ### 2. Evaluation
-To evaluate the DiffSyn model, run
+To evaluate the DiffSyn model, run:
 
 ```bash
 python eval.py
