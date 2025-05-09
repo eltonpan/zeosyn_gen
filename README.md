@@ -99,6 +99,7 @@ python predict.py
 ```
 
 Configurations are defined in [`predict.py`](predict.py). Here, we generate synthesis recipes for the UFI zeolite with C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2 as the OSDA. This automatically saves the generated routes at `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/syn_pred.csv`.
+
 Note: Generating 1000 synthesis routes **takes ~2 min**.
 
 ### 2. Visualizing generated synthesis recipes
