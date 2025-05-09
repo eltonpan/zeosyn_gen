@@ -12,23 +12,23 @@ configs = {
             "split" : "system",
             "fname": "run1",
             "device" : "cuda:0",
-            "train_batch_size": 128, # optimal 128
-            "train_lr": 4e-4, # optimal 4e-4
-            "train_num_steps": 1e6, # optimal 1e6
-            "gradient_accumulate_every": 2, # optimal 2
-            "ema_decay": 0.9, # optimal 0.9
+            "train_batch_size": 32,
+            "train_lr": 4e-4,
+            "train_num_steps": 1e6,
+            "gradient_accumulate_every": 2,
+            "ema_decay": 0.99,
             "amp": False,
             "lr_decay": False,
             "lr_decay_gamma": 0.99999,
-            "save_all_model_checkpoints": True,
+            "save_all_model_checkpoints": False, # Save all model checkpoints
             "model_params":{
                             "dim": 12,
-                            "dim_mults": (64, 128, 256), # optimal (64, 128, 256)
+                            "dim_mults": (32, 64, 128),
                             "channels": 1,
                             "resnet_block_groups": 4,
-                            "cond_drop_prob": 0.10, # optimal 0.10
+                            "cond_drop_prob": 0.1,
                             "seq_length": 12,
-                            "timesteps": 100, # optimal 100
+                            "timesteps": 1000,
                             "zeo_feat_dims": 143, 
                             "osda_feat_dims": 14,
                             "zeo_h_dims": 64, 
@@ -45,7 +45,8 @@ def train_diff(configs):
 
     # Create run folder
     # assert os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}") == False, 'Name already taken. Please choose another folder name (configs["fname"] in `train_diff.py`).'
-    os.mkdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}")
+    if not os.path.isdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}"):
+        os.mkdir(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}")
 
     # Save configs
     with open(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/configs.json", "w") as outfile:

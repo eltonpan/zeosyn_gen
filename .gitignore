@@ -20,6 +20,6 @@ predictions/RHO_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2
 predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2_manuscript
 predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/syn_pred.csv
 src/
-runs/diff/system/run1/
+# runs/diff/system/run1/
 data/__pycache__
 predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/syn_pred.csv

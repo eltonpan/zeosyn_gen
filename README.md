@@ -49,13 +49,10 @@ python -m ipykernel install --user --name=zsg
 We demonstrate the DiffSyn model for prediction synthesis recipes for UFI zeolite (Fig. 5 of the manuscript).
 
 ### 1. Generating new synthesis routes using DiffSyn for a specific system
-Create run folder called `run1` and download trained model weights
+Download trained model weights `model.pt` in run folder `runs/diff/system/run1/`
 
 ```
-mkdir runs/diff/system/run1
-cd runs/diff/system/run1
-wget...
-cd ../../..
+wget -O runs/diff/system/run1/model.pt https://www.dropbox.com/scl/fi/vmf5ag87vszlikmlsnlg4/model.pt?rlkey=9p1d2ht0qxr32of0xizsmqxat&st=obgh0a2n&dl=1
 ```
 
 To run inference using DiffSyn, run 
@@ -64,11 +61,11 @@ To run inference using DiffSyn, run
 python predict.py
 ```
 
-Configurations are defined in `predict.py`. Here, we generate synthesis recipes for the UFI zeolite with C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2 as the OSDA. This will automatically create a run directory at `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2`.
-Note: Generating 1000 synthesis routes takes ~2 min.
+Configurations are defined in `predict.py`. Here, we generate synthesis recipes for the UFI zeolite with C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2 as the OSDA. This automatically saves the generated routes at `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/syn_pred.csv`.
+Note: Generating 1000 synthesis routes **takes ~2 min**.
 
 ### 2. Visualizing generated synthesis recipes
-Results can be visualized in `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/compare_pred_and_true.ipynb` (Fig. 5a and 5e of the manuscript).
+Results can be visualized using `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/compare_pred_and_true.ipynb` (Fig. 5a and 5e of the manuscript).
 
 ## Model training and evaluation
 
@@ -81,7 +78,7 @@ python train_diff.py
 
 Training configurations are defined in `train_diff.py`. For example, the name of the run is defined as `"fname": "run1"` This will automatically create a run directory in `runs/diff/system/run1`. If you run into OOM errors, please lower `batch_size` in the corresponding config files for each task.
 
-Note: Training will takes ~1 week. We recommend you download the model weights from .....
+Note: Training will takes ~50 hours. We recommend you download the model weights from .....
 
 ### 2. Evaluation
 To evaluate the DiffSyn model, run

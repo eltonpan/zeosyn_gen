@@ -97,9 +97,10 @@ def load_model(model_type, fname, split, load_step=None):
                 files = [f for f in os.listdir(path) if (".pt" in f)]
                 steps = [int(f.split('model_ep')[-1][:-3]) for f in files]
                 load_step = max(steps)
-            print(f'Loading model at step {load_step}...')
+            print(f"Loading model at runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/model_ep{load_step}.pt")
             model.load_state_dict(torch.load(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/model_ep{load_step}.pt", map_location=configs['device']))
         else:
+            print(f"Loading model at runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/model.pt")
             model.load_state_dict(torch.load(f"runs/{configs['model_type']}/{configs['split']}/{configs['fname']}/model.pt", map_location=configs['device']))
         model.eval()
 
@@ -379,7 +380,7 @@ def eval_zeolite_aggregated(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled
     wsd_zeo_agg = {} # Dict of WSDs for each zeolite
     cov_zeo_agg = {} # Dict of coverages for each zeolite
     ae_zeo_agg = {} # Dict of AEs for each zeolite
-    for zeo in zeo_systems:
+    for zeo in tqdm.tqdm(zeo_systems):
         if zeo != 'Dense/Amorphous':
             if plot:
                 print(zeo)
@@ -517,7 +518,7 @@ def eval_zeolite_osda(syn_pred, syn_pred_scaled, syn_true, syn_true_scaled, data
     wsd_zeo_osda = {} # Dict of WSDs for each zeolite-osda 
     cov_zeo_osda = {} # Dict of coverages for each zeolite
     ae_zeo_osda = {} # Dict of AEs for each zeolite-osda
-    for zeo, osda in zeo_osda_systems:
+    for zeo, osda in tqdm.tqdm(zeo_osda_systems):
         if zeo != 'Dense/Amorphous':
             if plot:
                 print(zeo, osda)
