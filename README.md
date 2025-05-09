@@ -1,17 +1,17 @@
 # DiffSyn: A Generative Diffusion Approach to Materials Synthesis Planning
 
-<p align="center">
-<img src="/figs/denoising_diffusion.gif" width="200" />
-</p>
-
-![](/figs/denoising_diffusion.png)
-
 This is the official repository of
 
 **DiffSyn: A Generative Diffusion Approach to Materials Synthesis Planning (Under Review)**
 Elton Pan†, Soonhyoung Kwon‡, Sulin Liu†, Mingrou Xie‡, Alexander Hoffman†, Yifei Duan†, Thorben Prein§, Killian Sheriff†, Yuriy Roman-Leshkov‡, Manuel Moliner¶, Rafael Gomez-Bombarelli†, Elsa Olivetti†*
 
 † MIT Materials Science & Engineering, ‡ MIT Chemical Engineering, § TUM, ¶ ITQ-UPV
+
+<p align="center">
+<img src="/figs/denoising_diffusion.gif" width="200" />
+</p>
+
+![](/figs/denoising_diffusion.png)
 
 <p align="center">
   <a href="/LICENSE">
