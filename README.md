@@ -79,7 +79,7 @@ Configurations are defined in [`predict.py`](predict.py). Here, we generate synt
 Note: Generating 1000 synthesis routes **takes ~2 min**.
 
 ### 2. Visualizing generated synthesis recipes
-Results can be visualized using `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/compare_pred_and_true.ipynb` (Fig. 5a and 5e of the manuscript).
+Results can be visualized using [`predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/compare_pred_and_true.ipynb`](predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/compare_pred_and_true.ipynb) (Fig. 5a and 5e of the manuscript).
 
 ## Model training and evaluation
 
