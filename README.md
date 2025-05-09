@@ -281,3 +281,13 @@ Baseline models can be trained by running the corresponding `train_<MODEL_NAME>.
 - `visualize_prec_dataset.ipynb`: Guide on how to access key parts of precursor generation dataset
 
 Note: The `cde` environment is required to run training and inference of Gausssian mixture models (gmm).
+
+## Contact
+If you have any questions, please contact us at [eltonpan@mit.edu](mailto:eltonpan@mit.edu) or [elsao@mit.edu](mailto:elsao@mit.edu).
+
+## To-do:
+- [x] Test conda installation on Linux systems
+- [x] Test conda installation on non-Linux system
+- [ ] Add link to paper
+- [ ] Update Bibtex (after issue is out)
+- [ ] Add Colab notebook option
