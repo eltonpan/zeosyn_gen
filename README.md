@@ -8,7 +8,7 @@ Elton Pan†, Soonhyoung Kwon‡, Sulin Liu†, Mingrou Xie‡, Alexander Hoffma
 
 † MIT Materials Science & Engineering, ‡ MIT Chemical Engineering, § TUM, ¶ ITQ-UPV
 
-A subset of the results is in [NeurIPS AI for Materials (Oral Spotlight) paper, 2024](https://openreview.net/forum?id=hy39qxU6CQ). The full manuscript is under review and will be made available upon publication.
+A subset of the results is reported in [NeurIPS AI for Materials (Oral Spotlight) paper, 2024](https://openreview.net/forum?id=hy39qxU6CQ). The full manuscript is currently under review and will be made available upon publication.
 
 <p align="center">
 <img src="/figs/denoising_diffusion.gif" width="200" />
