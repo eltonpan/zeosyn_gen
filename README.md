@@ -63,7 +63,7 @@ python -m ipykernel install --user --name=zsg
 We demonstrate the DiffSyn model for prediction synthesis recipes for UFI zeolite (Fig. 5 of the manuscript).
 
 ### 1. Generating new synthesis routes using DiffSyn for a specific system
-Download trained model weights `model.pt` in run folder `runs/diff/system/run1/`
+Download trained model weights `model.pt` in run folder [`runs/diff/system/run1/`](runs/diff/system/run1)
 
 ```
 wget -O runs/diff/system/run1/model.pt https://www.dropbox.com/scl/fi/vmf5ag87vszlikmlsnlg4/model.pt?rlkey=9p1d2ht0qxr32of0xizsmqxat&st=obgh0a2n&dl=1
@@ -75,7 +75,7 @@ To run inference using DiffSyn, run
 python predict.py
 ```
 
-Configurations are defined in `predict.py`. Here, we generate synthesis recipes for the UFI zeolite with C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2 as the OSDA. This automatically saves the generated routes at `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/syn_pred.csv`.
+Configurations are defined in (`predict.py`)[predict.py]. Here, we generate synthesis recipes for the UFI zeolite with C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2 as the OSDA. This automatically saves the generated routes at `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/syn_pred.csv`.
 Note: Generating 1000 synthesis routes **takes ~2 min**.
 
 ### 2. Visualizing generated synthesis recipes
@@ -92,7 +92,7 @@ To train DiffSyn, run
 python train_diff.py
 ```
 
-Training configurations are defined in `train_diff.py`. For example, the name of the run is defined as `"fname": "run1"` This will automatically create a run directory in `runs/diff/system/run1`. If you run into OOM errors, please lower `batch_size` in the corresponding config files for each task.
+Training configurations are defined in (`train_diff.py`)[train_diff.py]. For example, the name of the run is defined as `"fname": "run1"` This will automatically create a run directory in (`runs/diff/system/run1`)[runs/diff/system/run1]. If you run into OOM errors, please lower `batch_size` in the corresponding config files for each task.
 
 Note: Training will takes ~50 hours. We recommend you download the model weights (see instructions under Demo section).
 
@@ -103,10 +103,12 @@ To evaluate the DiffSyn model, run
 python eval.py
 ```
 
-This evaluates the trained model via a 2-step process: First, we generate synthesis recipes for every test system and save it at `runs/diff/system/run1/syn_pred_agg-cond_scale_0.75-test.csv`. This takes ~200 min. Second, we compute metrics, Wasserstein distance and MAE, of the model and save them at `runs/diff/system/run1/wsd_zeo_osda.json` and `runs/diff/system/run1/reg_zeo_osda.json`, respectively.
+This evaluates the trained model via a 2-step process: First, we generate synthesis recipes for every test system and save it at `runs/diff/system/run1/syn_pred_agg-cond_scale_0.75-test.csv`. This takes ~200 min. Second, we compute metrics, Wasserstein distance and MAE, of the model and save them at `runs/diff/system/run1/wsd_zeo_osda.json` and `runs/diff/system/run1/reg_zeo_osda.json`, respectively. 
+
+You should expect to see a mean Wasserstein distance of `Mean WSD: 0.423` (Fig. 2a of manuscript).
 
 ### Baselines models
-Baseline models can be trained by running the corresponding `train_<MODEL_NAME>.py` and evaluated by changing the configs in `eval.py`.
+Baseline models can be trained by running the corresponding `train_<MODEL_NAME>.py` and evaluated by changing the configs in [`eval.py`](eval.py).
 
 ## Repo tree
 ```
