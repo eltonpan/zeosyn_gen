@@ -40,33 +40,46 @@ torchaudio==0.12.1+cu<YOUR_CUDA_VERSION>
 
 All experiments (training, inference and evaluation) are performed on a Rocky Linux machine with a NVIDIA RTX A5000 GPU (24GB RAM).
 
-## Installation guide
-1. Create environment
+## A) Installation guide
+
+1. Clone the repo
+
+```bash
+git clone https://github.com/eltonpan/zeosyn_gen.git
+```
+
+2. Navigate into the repo
+
+```bash
+cd zeosyn_gen
+```
+
+3. Create environment
 
 ```bash
 conda create -n zsg python=3.10.4
 ```
 
-2. Activate environment
+4. Activate environment
 
 ```bash
 conda activate zsg
 ```
 
-3. Install dependencies
+5. Install dependencies
 
 ```bash
 pip install -r env/requirements.txt
 ```
 
-3. Enable conda environment for jupyter notebook
+6. Enable conda environment for jupyter notebook
 
 ```bash
 conda install -c anaconda ipykernel
 python -m ipykernel install --user --name=zsg
 ```
 
-## Demo
+## B) Demo
 
 We demonstrate the DiffSyn model for prediction synthesis recipes for UFI zeolite (Fig. 5 of the manuscript).
 
@@ -89,7 +102,7 @@ Note: Generating 1000 synthesis routes **takes ~2 min**.
 ### 2. Visualizing generated synthesis recipes
 In the same directory as the above, results can be visualized using [`predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/compare_pred_and_true.ipynb`](predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2/compare_pred_and_true.ipynb) (Fig. 5a and 5e of the manuscript).
 
-## Model training and evaluation
+## C) Model training and evaluation
 
 ### 1. Training
 The DiffSyn model is trained on the [ZeoSyn dataset](https://pubs.acs.org/doi/10.1021/acscentsci.3c01615), consisting of 23,961 zeolite synthesis routes with 233 zeolite topologies and 921 organic structure-directing agents. 
