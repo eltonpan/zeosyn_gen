@@ -84,6 +84,8 @@ Results can be visualized using `predictions/UFI_C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC
 ## Model training and evaluation
 
 ### 1. Training
+The DiffSyn model is trained on the [ZeoSyn dataset](https://pubs.acs.org/doi/10.1021/acscentsci.3c01615), consisting of 23,961 zeolite synthesis routes with 233 zeolite topologies and 921 organic structure-directing agents. 
+
 To train DiffSyn, run 
 
 ```
