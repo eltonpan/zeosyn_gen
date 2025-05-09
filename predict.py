@@ -16,12 +16,11 @@ zeo, osda = 'UFI', 'C1COCCN2CCOCCOCCN(CCO1)CCOCCOCC2'
 
 # Set model parameters
 model_type = 'diff'
-fname = 'v3'
+fname = 'run1'
 cond_scale = 0.75
 split = 'system'
 
 def predict(zeo, osda, model_type, fname, cond_scale, split):
-    assert os.path.isdir(f"predictions/{zeo}_{osda}") == False, 'Prediction already exists.'
 
     # Load model
     model, configs = load_model(model_type, fname, split)
@@ -68,7 +67,8 @@ def predict(zeo, osda, model_type, fname, cond_scale, split):
     syn_pred = pd.DataFrame(syn_pred, columns=dataset.ratio_names+dataset.cond_names)
 
     # Save predictions
-    os.mkdir(f"predictions/{zeo}_{osda}")
+    if not os.path.isdir(f"predictions/{zeo}_{osda}"):
+        os.mkdir(f"predictions/{zeo}_{osda}")
     syn_pred.to_csv(f'predictions/{zeo}_{osda}/syn_pred.csv', index=False)
     print(f"Predictions saved to predictions/{zeo}_{osda}/syn_pred.csv")
 
