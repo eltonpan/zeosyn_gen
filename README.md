@@ -2,7 +2,7 @@
 
 This is the official repository of
 
-**[DiffSyn: A Generative Diffusion Approach to Materials Synthesis Planning (Under Review)**](https://arxiv.org/abs/2509.17094) **(Published in *Nature Computational Science*, under proof)**
+**[DiffSyn: A Generative Diffusion Approach to Materials Synthesis Planning**](https://arxiv.org/abs/2509.17094) **(Published in *Nature Computational Science*, under proof)**
 
 Elton Pan†, Soonhyoung Kwon‡, Sulin Liu†, Mingrou Xie‡, Alexander Hoffman†, Yifei Duan†, Thorben Prein§, Killian Sheriff†, Yuriy Roman-Leshkov‡, Manuel Moliner¶, Rafael Gomez-Bombarelli†, Elsa Olivetti†*
 
