@@ -2,13 +2,13 @@
 
 This is the official repository of
 
-**DiffSyn: A Generative Diffusion Approach to Materials Synthesis Planning (Under Review)**
+**[DiffSyn: A Generative Diffusion Approach to Materials Synthesis Planning (Under Review)**](https://arxiv.org/abs/2509.17094) **(Published in *Nature Computational Science*, under proof)**
 
 Elton Pan†, Soonhyoung Kwon‡, Sulin Liu†, Mingrou Xie‡, Alexander Hoffman†, Yifei Duan†, Thorben Prein§, Killian Sheriff†, Yuriy Roman-Leshkov‡, Manuel Moliner¶, Rafael Gomez-Bombarelli†, Elsa Olivetti†*
 
 † MIT Materials Science & Engineering, ‡ MIT Chemical Engineering, § TUM, ¶ ITQ-UPV
 
-A subset of the results is reported in [NeurIPS AI for Materials (Oral Spotlight) paper, 2024](https://openreview.net/forum?id=hy39qxU6CQ). The full manuscript is currently under review and will be made available upon publication.
+A subset of the results is also reported in [NeurIPS AI for Materials (Oral Spotlight) paper, 2024](https://openreview.net/forum?id=hy39qxU6CQ).
 
 <p align="center">
 <img src="/figs/denoising_diffusion.gif" width="200" />
@@ -314,9 +314,20 @@ Note: The `cde` environment is required to run training and inference of Gausssi
 ## Contact
 If you have any questions, please contact us at [eltonpan@mit.edu](mailto:eltonpan@mit.edu) or [elsao@mit.edu](mailto:elsao@mit.edu).
 
+## Cite
+If you use this dataset or code, please cite this paper:
+```
+@article{pan2025diffsyn,
+  title={DiffSyn: A Generative Diffusion Approach to Materials Synthesis Planning},
+  author={Pan, Elton and Kwon, Soonhyoung and Liu, Sulin and Xie, Mingrou and Hoffman, Alexander J and Duan, Yifei and Prein, Thorben and Sheriff, Killian and Roman-Leshkov, Yuriy and Moliner, Manuel and others},
+  journal={arXiv preprint arXiv:2509.17094},
+  year={2025}
+}
+```
+
 ## To-do:
 - [x] Test conda installation on Linux systems
 - [x] Test conda installation on non-Linux system
-- [ ] Add link to paper
-- [ ] Update Bibtex (after issue is out)
+- [x] Add link to paper
+- [x] Update Bibtex (after issue is out)
 - [ ] Add Colab notebook option
