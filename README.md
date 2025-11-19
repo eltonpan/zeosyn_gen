@@ -22,7 +22,12 @@ A subset of the results is also reported in [NeurIPS AI for Materials (Oral Spot
   </a>
 </p>
 
-[![DOI](https://zenodo.org/badge/738261083.svg)](https://doi.org/10.5281/zenodo.17645370)
+<p align="center">
+  <a href="https://doi.org/10.5281/zenodo.17645370">
+    <img src="https://zenodo.org/badge/738261083.svg" alt="DOI">
+  </a>
+</p>
+
 
 
 ## System requirements
