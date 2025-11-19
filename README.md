@@ -22,6 +22,9 @@ A subset of the results is also reported in [NeurIPS AI for Materials (Oral Spot
   </a>
 </p>
 
+[![DOI](https://zenodo.org/badge/738261083.svg)](https://doi.org/10.5281/zenodo.17645370)
+
+
 ## System requirements
 - Python version 3.10.4
 - CUDA version >= 11.3
