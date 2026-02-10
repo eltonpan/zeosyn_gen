@@ -2,7 +2,9 @@
 
 This is the official repository of
 
-[**DiffSyn: A Generative Diffusion Approach to Materials Synthesis Planning**](https://arxiv.org/abs/2509.17094) **(Published in *Nature Computational Science*, under proof)**
+**DiffSyn: A Generative Diffusion Approach to Materials Synthesis Planning**
+**Published in [*Nature Computational Science*, 2026](https://www.nature.com/articles/s43588-025-00949-9)**
+**Featured in [*MIT News*](https://news.mit.edu/2026/how-generative-ai-can-help-scientists-synthesize-complex-materials-0202)**
 
 Elton Pan†, Soonhyoung Kwon‡, Sulin Liu†, Mingrou Xie‡, Alexander Hoffman†, Yifei Duan†, Thorben Prein§, Killian Sheriff†, Yuriy Roman-Leshkov‡, Manuel Moliner¶, Rafael Gomez-Bombarelli†, Elsa Olivetti†*
 
@@ -325,11 +327,13 @@ If you have any questions, please contact us at [eltonpan@mit.edu](mailto:eltonp
 ## Cite
 If you use this dataset or code, please cite this paper:
 ```
-@article{pan2025diffsyn,
-  title={DiffSyn: A Generative Diffusion Approach to Materials Synthesis Planning},
+@article{pan2026diffsyn,
+  title={DiffSyn: a generative diffusion approach to materials synthesis planning},
   author={Pan, Elton and Kwon, Soonhyoung and Liu, Sulin and Xie, Mingrou and Hoffman, Alexander J and Duan, Yifei and Prein, Thorben and Sheriff, Killian and Roman-Leshkov, Yuriy and Moliner, Manuel and others},
-  journal={arXiv preprint arXiv:2509.17094},
-  year={2025}
+  journal={Nature Computational Science},
+  pages={1--13},
+  year={2026},
+  publisher={Nature Publishing Group US New York}
 }
 ```
 
